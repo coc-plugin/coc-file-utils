@@ -1,6 +1,6 @@
 # coc-file-utils
 
-The best way to create, copy, move, rename and delete files and folders
+The best way to create, copy, move, rename and delete file and folder
 
 ## Install
 
