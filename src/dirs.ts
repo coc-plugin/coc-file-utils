@@ -76,7 +76,7 @@ export default class DirsList extends BasicList {
   public description = 'List all dirs in current workspace';
   constructor() {
     super();
-    this.addAction('move', async (item) => {
+    this.addAction('move to', async (item) => {
       if (!item.sortText) return;
       const file = (await workspace.document).uri;
       const confirm = await createPrompt(
@@ -95,7 +95,7 @@ export default class DirsList extends BasicList {
         renameDir(item.sortText, newName);
       }
     });
-    this.addAction('copy', async (item) => {
+    this.addAction('copy to', async (item) => {
       if (!item.sortText) return;
       const file = (await workspace.document).uri;
       const confirm = await createPrompt(
