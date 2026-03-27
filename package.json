@@ -39,8 +39,12 @@
     },
     "commands": [
       {
-        "command": "coc-file-utils.deleteFile",
+        "command": "coc-file-utils.delete",
         "title": "Delete File"
+      },
+      {
+        "command": "coc-file-utils.rename",
+        "title": "Rename File"
       }
     ]
   },

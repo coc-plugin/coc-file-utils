@@ -67,3 +67,21 @@ export function moveFile(srcFilePath: string, destPath: string) {
     window.showInformationMessage(`File moved to: ${destFilePath}`);
   }
 }
+
+export function renameFile(srcFilePath: string, newName: string) {
+  if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
+    const destFilePath = `${srcFilePath.substring(0, srcFilePath.lastIndexOf('/'))}/${newName}`;
+    fs.renameSync(srcFilePath, destFilePath);
+    nvim.command('bdelete!');
+    nvim.command(`edit ${destFilePath}`);
+    window.showInformationMessage(`File renamed to: ${destFilePath}`);
+  }
+}
+
+export function renameDir(srcDirPath: string, newName: string) {
+  if (fs.existsSync(srcDirPath) && fs.lstatSync(srcDirPath).isDirectory()) {
+    const destDirPath = `${srcDirPath.substring(0, srcDirPath.lastIndexOf('/'))}/${newName}`;
+    fs.renameSync(srcDirPath, destDirPath);
+    window.showInformationMessage(`Directory renamed to: ${destDirPath}`);
+  }
+}

@@ -6,7 +6,7 @@ import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
 import { createInput, createPrompt } from './util/ui';
-import { create, deleteDir, moveFile, copyFile } from './util/file';
+import { create, deleteDir, moveFile, copyFile, renameDir } from './util/file';
 import { executable } from './util';
 
 class Task extends EventEmitter implements ListTask {
@@ -84,6 +84,15 @@ export default class DirsList extends BasicList {
       );
       if (confirm) {
         moveFile(file.split('file://')[1], item.sortText);
+      }
+    });
+    this.addAction('rename', async (item) => {
+      if (!item.sortText) return;
+      const newName = await createInput('Enter the new name of this dir');
+      if (!newName || newName === 'outPut') return;
+      const confirm = await createPrompt(`Are you sure you want to rename this dir to ${newName}?`);
+      if (confirm) {
+        renameDir(item.sortText, newName);
       }
     });
     this.addAction('copy', async (item) => {
