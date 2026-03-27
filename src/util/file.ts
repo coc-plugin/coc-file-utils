@@ -37,12 +37,8 @@ export function deleteFile(filePath: string) {
 
 export function deleteDir(dirPath: string) {
   if (fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory()) {
-    if (fs.readdirSync(dirPath).length === 0) {
-      fs.rmSync(dirPath, { recursive: true, force: true });
-      window.showInformationMessage(`Directory deleted: ${dirPath}`);
-    } else {
-      window.showInformationMessage(`Directory is not empty: ${dirPath}`);
-    }
+    fs.rmSync(dirPath, { recursive: true, force: true });
+    window.showInformationMessage(`Directory deleted: ${dirPath}`);
   } else {
     window.showErrorMessage(`Directory does not exist: ${dirPath}`);
   }
