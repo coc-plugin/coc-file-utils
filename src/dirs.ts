@@ -7,6 +7,7 @@ import path from 'path';
 import readline from 'readline';
 import { createInput, createPrompt } from './util/ui';
 import { create, deleteDir, moveFile } from './util/file';
+import { executable } from './util';
 
 class Task extends EventEmitter implements ListTask {
   private processes: ChildProcess[] = [];
@@ -107,7 +108,11 @@ export default class DirsList extends BasicList {
   }
 
   public getCommand(): { cmd: string; args: string[] } {
-    return { cmd: 'fd', args: ['--color', 'never', '--type', 'directory'] };
+    if (executable('fd')) {
+      return { cmd: 'fd', args: ['--color', 'never', '--type', 'directory'] };
+    } else {
+      throw new Error('Unable to find command for dirs list.');
+    }
   }
 
   public async loadItems(context: ListContext): Promise<ListTask | null> {
