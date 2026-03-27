@@ -2,7 +2,12 @@ import { commands, ExtensionContext, listManager, workspace } from 'coc.nvim';
 import DirsList from './dirs';
 import { deleteFile } from './util/file';
 import { createPrompt } from './util/ui';
+import { getConfigItem } from './config';
 export async function activate(context: ExtensionContext): Promise<void> {
+  const enable = getConfigItem('enable', true);
+  if (!enable) {
+    return;
+  }
   context.subscriptions.push(
     listManager.registerList(new DirsList()),
     commands.registerCommand('coc-file-utils.deleteFile', async () => {
