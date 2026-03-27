@@ -13,6 +13,7 @@ The best way to create, copy, move, rename and delete file and folder
 ## commands
 
 `:CocCommand coc-file-utils.delete` delete file
+
 `:CocCommand coc-file-utils.rename` rename file
 
 ## License
