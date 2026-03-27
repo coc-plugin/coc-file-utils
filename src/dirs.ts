@@ -69,7 +69,7 @@ class Task extends EventEmitter implements ListTask {
   }
 }
 
-export default class DirList extends BasicList {
+export default class DirsList extends BasicList {
   public name = 'dirs';
   public readonly defaultAction = 'create(dir/file)';
   public description = 'List all dirs in current workspace';
