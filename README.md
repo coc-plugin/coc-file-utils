@@ -1,18 +1,18 @@
 # coc-file-utils
 
-The best way to create, copy, move, rename and delete files and folders (multiple files)
+The best way to create, copy, move, rename and delete files and folders
 
 ## Install
 
 `:CocInstall coc-file-utils`
 
-## Keymaps
-
-`nmap <silent> <C-l> <Plug>(coc-coc-file-utils-keymap)`
-
 ## Lists
 
-`:CocList demo_list`
+`:CocList dirs`
+
+## commands
+
+`:CocCommand coc-file-utils.deleteFile`
 
 ## License
 
