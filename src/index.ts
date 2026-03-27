@@ -13,6 +13,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     listManager.registerList(new DirsList()),
     commands.registerCommand('coc-file-utils.rename', async () => {
       const file = (await workspace.document).uri;
+      if (!file) return;
       const newName = await createInput('Enter the new name for the file:');
       if (!newName || newName == 'outPut') return;
       const status = await createPrompt('Are you sure you want to rename this file?');
@@ -22,6 +23,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }),
     commands.registerCommand('coc-file-utils.delete', async () => {
       const file = (await workspace.document).uri;
+      if (!file) return;
       const status = await createPrompt('Are you sure you want to delete this file?');
       if (status) {
         deleteFile(file.split('file://')[1]);
