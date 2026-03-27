@@ -30,6 +30,8 @@ export function deleteFile(filePath: string) {
     fs.unlinkSync(filePath);
     nvim.command('enew');
     window.showInformationMessage(`File deleted: ${filePath}`);
+  } else {
+    window.showErrorMessage(`File does not exist: ${filePath}`);
   }
 }
 
@@ -40,6 +42,8 @@ export function deleteDir(dirPath: string) {
     } else {
       window.showInformationMessage(`Directory is not empty: ${dirPath}`);
     }
+  } else {
+    window.showErrorMessage(`Directory does not exist: ${dirPath}`);
   }
 }
 
@@ -52,6 +56,8 @@ export function copyFile(srcFilePath: string, destPath: string) {
     fs.copyFileSync(srcFilePath, destFilePath);
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File copied to: ${destFilePath}`);
+  } else {
+    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
   }
 }
 
@@ -65,6 +71,8 @@ export function moveFile(srcFilePath: string, destPath: string) {
     nvim.command('bdelete!');
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File moved to: ${destFilePath}`);
+  } else {
+    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
   }
 }
 
@@ -75,13 +83,18 @@ export function renameFile(srcFilePath: string, newName: string) {
     nvim.command('bdelete!');
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File renamed to: ${destFilePath}`);
+  } else {
+    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
   }
 }
 
 export function renameDir(srcDirPath: string, newName: string) {
   if (fs.existsSync(srcDirPath) && fs.lstatSync(srcDirPath).isDirectory()) {
+    srcDirPath = srcDirPath.endsWith('/') ? srcDirPath.slice(0, -1) : srcDirPath;
     const destDirPath = `${srcDirPath.substring(0, srcDirPath.lastIndexOf('/'))}/${newName}`;
     fs.renameSync(srcDirPath, destDirPath);
     window.showInformationMessage(`Directory renamed to: ${destDirPath}`);
+  } else {
+    window.showErrorMessage(`Directory does not exist: ${srcDirPath}`);
   }
 }
