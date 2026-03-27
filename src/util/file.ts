@@ -43,6 +43,18 @@ export function deleteDir(dirPath: string) {
   }
 }
 
+export function copyFile(srcFilePath: string, destPath: string) {
+  if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
+    const destFilePath = `${destPath}/${srcFilePath.split('/').pop()}`;
+    if (!fs.existsSync(destPath)) {
+      fs.mkdirSync(destPath, { recursive: true });
+    }
+    fs.copyFileSync(srcFilePath, destFilePath);
+    nvim.command(`edit ${destFilePath}`);
+    window.showInformationMessage(`File copied to: ${destFilePath}`);
+  }
+}
+
 export function moveFile(srcFilePath: string, destPath: string) {
   if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
     const destFilePath = `${destPath}/${srcFilePath.split('/').pop()}`;

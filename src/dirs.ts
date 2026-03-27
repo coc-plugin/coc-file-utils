@@ -6,7 +6,7 @@ import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
 import { createInput, createPrompt } from './util/ui';
-import { create, deleteDir, moveFile } from './util/file';
+import { create, deleteDir, moveFile, copyFile } from './util/file';
 import { executable } from './util';
 
 class Task extends EventEmitter implements ListTask {
@@ -76,13 +76,6 @@ export default class DirsList extends BasicList {
   public description = 'List all dirs in current workspace';
   constructor() {
     super();
-    this.addAction('delete', async (item) => {
-      if (!item.sortText) return;
-      const confirm = await createPrompt(`Are you sure you want to delete ${item.sortText}?`);
-      if (confirm) {
-        deleteDir(item.sortText);
-      }
-    });
     this.addAction('move', async (item) => {
       if (!item.sortText) return;
       const file = (await workspace.document).uri;
@@ -91,6 +84,23 @@ export default class DirsList extends BasicList {
       );
       if (confirm) {
         moveFile(file.split('file://')[1], item.sortText);
+      }
+    });
+    this.addAction('copy', async (item) => {
+      if (!item.sortText) return;
+      const file = (await workspace.document).uri;
+      const confirm = await createPrompt(
+        `Are you sure you want to copy this file to ${item.sortText}?`
+      );
+      if (confirm) {
+        copyFile(file.split('file://')[1], item.sortText);
+      }
+    });
+    this.addAction('delete', async (item) => {
+      if (!item.sortText) return;
+      const confirm = await createPrompt(`Are you sure you want to delete ${item.sortText}?`);
+      if (confirm) {
+        deleteDir(item.sortText);
       }
     });
     this.addAction('create(dir/file)', async (item) => {
