@@ -4,11 +4,11 @@ The best way to create, copy, move, rename and delete file and folder
 
 ## TODO
 
-[x] Select folder to batch create files or folders
+[x] batch create files or folders (supports folder selection)
 
 [x] Choose folder renaming
 
-[x] Select folder to delete
+[x] Choose folder delete
 
 [x] Copy the current file to the corresponding folder (supports folder selection)
 
