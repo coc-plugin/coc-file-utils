@@ -42,6 +42,10 @@ The best way to create, copy, move, rename and delete file and folder
 
 `:CocCommand coc-file-utils.rename` rename file
 
+`:CocCommand coc-file-utils.deleteDir` delete folder
+
+`:CocCommand coc-file-utils.renameDir` rename folder
+
 ## License
 
 MIT

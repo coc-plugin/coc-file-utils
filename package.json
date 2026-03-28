@@ -43,12 +43,20 @@
         "title": "Delete File"
       },
       {
+        "command": "coc-file-utils.deleteDir",
+        "title": "Delete Folder"
+      },
+      {
         "command": "coc-file-utils.create",
         "title": "Create File or Folder"
       },
       {
         "command": "coc-file-utils.rename",
         "title": "Rename File"
+      },
+      {
+        "command": "coc-file-utils.renameDir",
+        "title": "Rename Folder"
       }
     ]
   },
