@@ -24,7 +24,7 @@ The best way to create, copy, move, rename and delete file and folder
 
 - [ ] Before renaming or deleting a file, it is necessary to save and close all buffers in the file
 
-- [ ] Select folder, create folder or file, support root directory
+- [ ] Choose a folder to create folders and files, support root directory
 
 - [ ] Support copying folders
 
