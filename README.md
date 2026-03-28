@@ -6,9 +6,9 @@ The best way to create, copy, move, rename and delete file and folder
 
 [x] batch create files or folders (supports folder selection)
 
-[x] Choose folder renaming
+[x] folder renaming (supports folder selection)
 
-[x] Choose folder delete
+[x] folder delete (supports folder selection)
 
 [x] Copy the current file to the corresponding folder (supports folder selection)
 
