@@ -1,6 +1,6 @@
-import { commands, ExtensionContext, listManager, workspace } from 'coc.nvim';
+import { commands, ExtensionContext, listManager, window, workspace } from 'coc.nvim';
 import DirsList from './dirs';
-import { deleteFile, renameFile } from './util/file';
+import { deleteFile, renameFile, create } from './util/file';
 import { createPrompt } from './util/ui';
 import { getConfigItem } from './config';
 import { createInput } from './util/ui';
@@ -19,6 +19,18 @@ export async function activate(context: ExtensionContext): Promise<void> {
       const status = await createPrompt('Are you sure you want to rename this file?');
       if (status) {
         renameFile(file.split('file://')[1], newName);
+      }
+    }),
+    commands.registerCommand('coc-file-utils.create', async () => {
+      const fileName = await createInput(
+        'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
+      );
+      if (!fileName || fileName === 'outPut') return;
+      const confirm = await createPrompt(
+        'Are you sure you want to create these files/directories?'
+      );
+      if (confirm) {
+        create(process.cwd(), fileName);
       }
     }),
     commands.registerCommand('coc-file-utils.delete', async () => {
