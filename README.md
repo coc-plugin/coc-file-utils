@@ -4,6 +4,20 @@ The best way to create, copy, move, rename and delete file and folder
 
 ## TODO
 
+[x] Select folder to batch create files or folders
+
+[x] Choose folder renaming
+
+[x] Select folder to delete
+
+[x] Copy the current file to the corresponding folder (supports folder selection)
+
+[x] Move the current file to the corresponding folder (supports folder selection)
+
+[x] Delete the current file
+
+[x] Rename the current file
+
 [ ] Before renaming a folder, you need to save and close all files opened in the old folder
 
 [ ] Before deleting a folder, you need to save and close all the files opened within it
