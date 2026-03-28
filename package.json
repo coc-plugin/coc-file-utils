@@ -40,23 +40,23 @@
     "commands": [
       {
         "command": "coc-file-utils.delete",
-        "title": "Delete File"
+        "title": "Delete the current file ."
       },
       {
         "command": "coc-file-utils.deleteDir",
-        "title": "Delete Folder"
+        "title": "Delete the folder where the current file is located ."
       },
       {
         "command": "coc-file-utils.create",
-        "title": "Create File or Folder"
+        "title": "Create files or folders in the root directory of the current project ."
       },
       {
         "command": "coc-file-utils.rename",
-        "title": "Rename File"
+        "title": "Rename the current file ."
       },
       {
         "command": "coc-file-utils.renameDir",
-        "title": "Rename Folder"
+        "title": "Rename the folder where the current file is located ."
       }
     ]
   },
