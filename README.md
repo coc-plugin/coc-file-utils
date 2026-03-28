@@ -18,11 +18,7 @@ The best way to create, copy, move, rename and delete file and folder
 
 - [x] Rename the current file
 
-- [ ] Before renaming a folder, you need to save and close the buffer for all files opened in the old folder
-
-- [ ] Before deleting a folder, you need to save and close the buffer for all open files in it
-
-- [ ] Before renaming or deleting a file, it is necessary to save and close all buffers in the file
+- [ ] When deleting, moving, or modifying files or folders, it is necessary to close the relevant files opened in the buffer
 
 - [ ] Choose a folder to create folders and files, support root directory
 
