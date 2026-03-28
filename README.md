@@ -2,7 +2,7 @@
 
 The best way to create, copy, move, rename and delete file and folder
 
-## TODO
+## Todo
 
 - [x] batch create files or folders (supports folder selection)
 
