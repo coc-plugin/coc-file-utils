@@ -12,7 +12,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   context.subscriptions.push(
     listManager.registerList(new DirsList()),
-    commands.registerCommand('coc-file-utils.rename', async () => {
+    commands.registerCommand('file.rename', async () => {
       const file = (await workspace.document).uri;
       if (!file) return;
       const newName = await createInput('Enter the new name for the file:');
@@ -22,7 +22,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         renameFile(file.split('file://')[1], newName);
       }
     }),
-    commands.registerCommand('coc-file-utils.renameDir', async () => {
+    commands.registerCommand('file.renameDir', async () => {
       const file = (await workspace.document).uri;
       if (!file) return;
       const newName = await createInput('Enter the new name of this dir');
@@ -33,7 +33,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         renameDir(dir, newName);
       }
     }),
-    commands.registerCommand('coc-file-utils.create', async () => {
+    commands.registerCommand('file.create', async () => {
       const fileName = await createInput(
         'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
       );
@@ -45,7 +45,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         create(process.cwd(), fileName);
       }
     }),
-    commands.registerCommand('coc-file-utils.delete', async () => {
+    commands.registerCommand('file.delete', async () => {
       const file = (await workspace.document).uri;
       if (!file) return;
       const status = await createPrompt('Are you sure you want to delete this file?');
@@ -53,7 +53,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         deleteFile(file.split('file://')[1]);
       }
     }),
-    commands.registerCommand('coc-file-utils.deleteDir', async () => {
+    commands.registerCommand('file.deleteDir', async () => {
       const file = (await workspace.document).uri;
       if (!file) return;
       const dir = dirname(file.split('file://')[1]);
