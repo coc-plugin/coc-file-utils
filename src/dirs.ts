@@ -1,5 +1,14 @@
 import { ChildProcess, spawn } from 'child_process';
-import { BasicList, ListContext, ListTask, Location, Range, Uri, workspace } from 'coc.nvim';
+import {
+  BasicList,
+  ListContext,
+  ListTask,
+  Location,
+  Range,
+  Uri,
+  window,
+  workspace,
+} from 'coc.nvim';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
@@ -18,6 +27,7 @@ class Task extends EventEmitter implements ListTask {
     let filterByName = config.get<boolean>('filterByName', false);
     for (let cwd of cwds) {
       let process = spawn(cmd, args, { cwd });
+      process.stdout.push('/\n', 'utf8');
       this.processes.push(process);
       process.on('error', (e) => {
         this.emit('error', e.message);

@@ -20,7 +20,7 @@ The best way to create, copy, move, rename and delete file and folder
 
 - [ ] When deleting, moving, or modifying files or folders, it is necessary to close the relevant files opened in the buffer
 
-- [ ] Choose a folder to create folders and files, support root directory
+- [x] Choose a folder to create folders and files, support root directory
 
 - [ ] Support copying folders
 
