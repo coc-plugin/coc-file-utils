@@ -38,12 +38,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
       );
       if (!fileName || fileName === 'outPut') return;
-      const confirm = await createPrompt(
-        'Are you sure you want to create these files/directories?'
-      );
-      if (confirm) {
-        create(process.cwd(), fileName);
-      }
+      create(process.cwd(), fileName);
     }),
     commands.registerCommand('file.delete', async () => {
       const file = (await workspace.document).uri;

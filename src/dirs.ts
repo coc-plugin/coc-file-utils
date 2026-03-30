@@ -98,12 +98,7 @@ export default class DirsList extends BasicList {
     this.addAction('copy to', async (item) => {
       if (!item.sortText) return;
       const file = (await workspace.document).uri;
-      const confirm = await createPrompt(
-        `Are you sure you want to copy this file to ${item.sortText}?`
-      );
-      if (confirm) {
-        copyFile(file.split('file://')[1], item.sortText);
-      }
+      copyFile(file.split('file://')[1], item.sortText);
     });
     this.addAction('delete', async (item) => {
       if (!item.sortText) return;
@@ -117,12 +112,7 @@ export default class DirsList extends BasicList {
         'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
       );
       if (!fileName || fileName === 'outPut' || !item.sortText) return;
-      const confirm = await createPrompt(
-        'Are you sure you want to create these files/directories?'
-      );
-      if (confirm) {
-        create(item.sortText, fileName);
-      }
+      create(item.sortText, fileName);
     });
   }
 
