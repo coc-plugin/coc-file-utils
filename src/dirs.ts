@@ -27,7 +27,7 @@ class Task extends EventEmitter implements ListTask {
     let filterByName = config.get<boolean>('filterByName', false);
     for (let cwd of cwds) {
       let process = spawn(cmd, args, { cwd });
-      process.stdout.push('/\n', 'utf8');
+      process.stdout.push('/\n');
       this.processes.push(process);
       process.on('error', (e) => {
         this.emit('error', e.message);
@@ -48,7 +48,7 @@ class Task extends EventEmitter implements ListTask {
         let location = Location.create(Uri.file(file).toString(), range);
         if (!filterByName) {
           this.emit('data', {
-            label: line,
+            label: line !== '/' ? '/'.concat(line) : '/',
             sortText: file,
             location,
           });
