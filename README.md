@@ -22,8 +22,6 @@ The best way to create, copy, move, rename and delete file and folder
 
 - [x] Choose a folder to create folders and files, support root directory
 
-- [ ] Support copying folders
-
 ## Install
 
 `:CocInstall coc-file-utils`
