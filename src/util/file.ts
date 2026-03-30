@@ -1,109 +1,159 @@
-import fs from 'fs';
+import fs from 'fs/promises';
+import * as path from 'path';
 import { window, nvim } from 'coc.nvim';
 import { closeDirBuffers, closeFileBuffer } from './buffer';
 
-export function create(basePath: string, name: string) {
-  const names = name.split(',');
+export async function create(basePath: string, name: string): Promise<void> {
+  const names = name
+    .split(',')
+    .map((n) => n.trim())
+    .filter(Boolean);
+
   for (const name of names) {
-    if (name.endsWith('/')) {
-      const dirPath = `${basePath}/${name}`;
-      if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
+    try {
+      if (name.endsWith('/')) {
+        const dirPath = path.join(basePath, name);
+        await fs.mkdir(dirPath, { recursive: true });
         window.showInformationMessage(`Directory created: ${dirPath}`);
-      }
-    } else {
-      const filePath = `${basePath}/${name}`;
-      if (!fs.existsSync(filePath)) {
-        const dirPath = filePath.substring(0, filePath.lastIndexOf('/'));
-        if (!fs.existsSync(dirPath)) {
-          fs.mkdirSync(dirPath, { recursive: true });
-        }
-        fs.writeFileSync(filePath, '');
+      } else {
+        const filePath = path.join(basePath, name);
+        const dirPath = path.dirname(filePath);
+
+        await fs.mkdir(dirPath, { recursive: true });
+        await fs.writeFile(filePath, '');
+
         window.showInformationMessage(`File created: ${filePath}`);
       }
+    } catch (err: any) {
+      window.showErrorMessage(`Failed to create ${name}: ${err.message}`);
     }
   }
 }
 
-export async function deleteFile(filePath: string) {
-  if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
-    try {
-      await closeFileBuffer(filePath);
-    } catch {}
-    fs.unlinkSync(filePath);
+export async function deleteFile(filePath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(filePath);
+    if (!stat.isFile()) {
+      window.showErrorMessage(`Not a file: ${filePath}`);
+      return;
+    }
+
+    await closeFileBuffer(filePath).catch(() => {});
+    await fs.unlink(filePath);
+
     window.showInformationMessage(`File deleted: ${filePath}`);
-  } else {
-    window.showErrorMessage(`File does not exist: ${filePath}`);
-  }
-}
-
-export async function deleteDir(dirPath: string) {
-  if (fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory()) {
-    try {
-      await closeDirBuffers(dirPath);
-    } catch {}
-    fs.rmSync(dirPath, { recursive: true, force: true });
-    window.showInformationMessage(`Directory deleted: ${dirPath}`);
-  } else {
-    window.showErrorMessage(`Directory does not exist: ${dirPath}`);
-  }
-}
-
-export function copyFile(srcFilePath: string, destPath: string) {
-  if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
-    const destFilePath = `${destPath}/${srcFilePath.split('/').pop()}`;
-    if (!fs.existsSync(destPath)) {
-      fs.mkdirSync(destPath, { recursive: true });
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      window.showErrorMessage(`File does not exist: ${filePath}`);
+    } else {
+      window.showErrorMessage(`Failed to delete file: ${err.message}`);
     }
-    fs.copyFileSync(srcFilePath, destFilePath);
+  }
+}
+
+export async function deleteDir(dirPath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(dirPath);
+    if (!stat.isDirectory()) {
+      window.showErrorMessage(`Not a directory: ${dirPath}`);
+      return;
+    }
+
+    await closeDirBuffers(dirPath).catch(() => {});
+    await fs.rm(dirPath, { recursive: true, force: true });
+
+    window.showInformationMessage(`Directory deleted: ${dirPath}`);
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      window.showErrorMessage(`Directory does not exist: ${dirPath}`);
+    } else {
+      window.showErrorMessage(`Failed to delete directory: ${err.message}`);
+    }
+  }
+}
+
+export async function copyFile(srcFilePath: string, destPath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcFilePath);
+    if (!stat.isFile()) {
+      window.showErrorMessage(`Not a file: ${srcFilePath}`);
+      return;
+    }
+
+    const fileName = path.basename(srcFilePath);
+    const destFilePath = path.join(destPath, fileName);
+
+    await fs.mkdir(destPath, { recursive: true });
+    await fs.copyFile(srcFilePath, destFilePath);
+
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File copied to: ${destFilePath}`);
-  } else {
-    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to copy file: ${err.message}`);
   }
 }
 
-export async function moveFile(srcFilePath: string, destPath: string) {
-  if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
-    const destFilePath = `${destPath}/${srcFilePath.split('/').pop()}`;
-    if (!fs.existsSync(destPath)) {
-      fs.mkdirSync(destPath, { recursive: true });
+export async function moveFile(srcFilePath: string, destPath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcFilePath);
+    if (!stat.isFile()) {
+      window.showErrorMessage(`Not a file: ${srcFilePath}`);
+      return;
     }
-    try {
-      await closeFileBuffer(srcFilePath);
-    } catch {}
-    fs.renameSync(srcFilePath, destFilePath);
+
+    const fileName = path.basename(srcFilePath);
+    const destFilePath = path.join(destPath, fileName);
+
+    await fs.mkdir(destPath, { recursive: true });
+    await closeFileBuffer(srcFilePath).catch(() => {});
+
+    await fs.rename(srcFilePath, destFilePath);
+
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File moved to: ${destFilePath}`);
-  } else {
-    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to move file: ${err.message}`);
   }
 }
 
-export async function renameFile(srcFilePath: string, newName: string) {
-  if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
-    const destFilePath = `${srcFilePath.substring(0, srcFilePath.lastIndexOf('/'))}/${newName}`;
-    try {
-      await closeFileBuffer(srcFilePath);
-    } catch {}
-    fs.renameSync(srcFilePath, destFilePath);
+export async function renameFile(srcFilePath: string, newName: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcFilePath);
+    if (!stat.isFile()) {
+      window.showErrorMessage(`Not a file: ${srcFilePath}`);
+      return;
+    }
+
+    const dir = path.dirname(srcFilePath);
+    const destFilePath = path.join(dir, newName);
+
+    await closeFileBuffer(srcFilePath).catch(() => {});
+    await fs.rename(srcFilePath, destFilePath);
+
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File renamed to: ${destFilePath}`);
-  } else {
-    window.showErrorMessage(`File does not exist: ${srcFilePath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to rename file: ${err.message}`);
   }
 }
 
-export async function renameDir(srcDirPath: string, newName: string) {
-  if (fs.existsSync(srcDirPath) && fs.lstatSync(srcDirPath).isDirectory()) {
-    try {
-      await closeDirBuffers(srcDirPath);
-    } catch {}
-    srcDirPath = srcDirPath.endsWith('/') ? srcDirPath.slice(0, -1) : srcDirPath;
-    const destDirPath = `${srcDirPath.substring(0, srcDirPath.lastIndexOf('/'))}/${newName}`;
-    fs.renameSync(srcDirPath, destDirPath);
+export async function renameDir(srcDirPath: string, newName: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcDirPath);
+    if (!stat.isDirectory()) {
+      window.showErrorMessage(`Not a directory: ${srcDirPath}`);
+      return;
+    }
+
+    await closeDirBuffers(srcDirPath).catch(() => {});
+
+    const parentDir = path.dirname(srcDirPath);
+    const destDirPath = path.join(parentDir, newName);
+
+    await fs.rename(srcDirPath, destDirPath);
+
     window.showInformationMessage(`Directory renamed to: ${destDirPath}`);
-  } else {
-    window.showErrorMessage(`Directory does not exist: ${srcDirPath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to rename directory: ${err.message}`);
   }
 }
