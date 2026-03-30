@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { window, nvim } from 'coc.nvim';
+import { closeDirBuffers } from './buffer';
 
 export function create(basePath: string, name: string) {
   const names = name.split(',');
@@ -35,8 +36,11 @@ export function deleteFile(filePath: string) {
   }
 }
 
-export function deleteDir(dirPath: string) {
+export async function deleteDir(dirPath: string) {
   if (fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory()) {
+    try {
+      await closeDirBuffers(dirPath);
+    } catch {}
     fs.rmSync(dirPath, { recursive: true, force: true });
     window.showInformationMessage(`Directory deleted: ${dirPath}`);
   } else {
@@ -85,8 +89,11 @@ export function renameFile(srcFilePath: string, newName: string) {
   }
 }
 
-export function renameDir(srcDirPath: string, newName: string) {
+export async function renameDir(srcDirPath: string, newName: string) {
   if (fs.existsSync(srcDirPath) && fs.lstatSync(srcDirPath).isDirectory()) {
+    try {
+      await closeDirBuffers(srcDirPath);
+    } catch {}
     srcDirPath = srcDirPath.endsWith('/') ? srcDirPath.slice(0, -1) : srcDirPath;
     const destDirPath = `${srcDirPath.substring(0, srcDirPath.lastIndexOf('/'))}/${newName}`;
     fs.renameSync(srcDirPath, destDirPath);
