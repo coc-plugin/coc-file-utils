@@ -48,7 +48,7 @@ class Task extends EventEmitter implements ListTask {
         let location = Location.create(Uri.file(file).toString(), range);
         if (!filterByName) {
           this.emit('data', {
-            label: line !== '/' ? '/'.concat(line) : '/',
+            label: line,
             sortText: file,
             location,
           });
