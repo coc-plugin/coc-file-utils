@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { window, nvim } from 'coc.nvim';
-import { closeDirBuffers } from './buffer';
+import { closeDirBuffers, closeFileBuffer } from './buffer';
 
 export function create(basePath: string, name: string) {
   const names = name.split(',');
@@ -25,11 +25,12 @@ export function create(basePath: string, name: string) {
   }
 }
 
-export function deleteFile(filePath: string) {
+export async function deleteFile(filePath: string) {
   if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
-    nvim.command('bdelete!');
+    try {
+      await closeFileBuffer(filePath);
+    } catch {}
     fs.unlinkSync(filePath);
-    nvim.command('enew');
     window.showInformationMessage(`File deleted: ${filePath}`);
   } else {
     window.showErrorMessage(`File does not exist: ${filePath}`);
@@ -62,14 +63,16 @@ export function copyFile(srcFilePath: string, destPath: string) {
   }
 }
 
-export function moveFile(srcFilePath: string, destPath: string) {
+export async function moveFile(srcFilePath: string, destPath: string) {
   if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
     const destFilePath = `${destPath}/${srcFilePath.split('/').pop()}`;
     if (!fs.existsSync(destPath)) {
       fs.mkdirSync(destPath, { recursive: true });
     }
+    try {
+      await closeFileBuffer(srcFilePath);
+    } catch {}
     fs.renameSync(srcFilePath, destFilePath);
-    nvim.command('bdelete!');
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File moved to: ${destFilePath}`);
   } else {
@@ -77,11 +80,13 @@ export function moveFile(srcFilePath: string, destPath: string) {
   }
 }
 
-export function renameFile(srcFilePath: string, newName: string) {
+export async function renameFile(srcFilePath: string, newName: string) {
   if (fs.existsSync(srcFilePath) && fs.lstatSync(srcFilePath).isFile()) {
     const destFilePath = `${srcFilePath.substring(0, srcFilePath.lastIndexOf('/'))}/${newName}`;
+    try {
+      await closeFileBuffer(srcFilePath);
+    } catch {}
     fs.renameSync(srcFilePath, destFilePath);
-    nvim.command('bdelete!');
     nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File renamed to: ${destFilePath}`);
   } else {

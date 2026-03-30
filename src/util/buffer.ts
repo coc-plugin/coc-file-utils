@@ -19,3 +19,21 @@ export async function closeDirBuffers(dir: string) {
   }
   await nvim.command('doautocmd FileChangedShell');
 }
+
+export async function closeFileBuffer(filePath: string) {
+  const luaCode = `
+    local filePath = "${filePath}"
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+      local name = vim.api.nvim_buf_get_name(bufnr)
+      if name and name == filePath then
+          pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+          break
+      end
+    end
+  `;
+  try {
+    await nvim.lua(luaCode);
+  } catch (e) {
+    console.error('closeFileBuffer error:', e);
+  }
+}
