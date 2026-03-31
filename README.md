@@ -29,6 +29,7 @@ The best way to create, copy, move, rename and delete file and folder
 ## Lists
 
 `:CocList dirs`
+`:CocList files2`
 
 ## commands
 

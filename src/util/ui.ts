@@ -1,8 +1,8 @@
 import { window } from 'coc.nvim';
 
-export function createInput(title: string): Promise<string> {
+export function createInput(title: string, defaultValue = ''): Promise<string> {
   return new Promise(async (resolve, _) => {
-    const box = await window.createInputBox(title, '', {
+    const box = await window.createInputBox(title, defaultValue, {
       position: 'center',
     });
     box.onDidFinish(async (name) => {

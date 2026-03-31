@@ -1,5 +1,6 @@
 import { commands, ExtensionContext, listManager, workspace } from 'coc.nvim';
 import DirsList from './dirs';
+import FilesList from './files';
 import { deleteFile, renameFile, renameDir, deleteDir, create } from './util/file';
 import { createPrompt } from './util/ui';
 import { getConfigItem } from './config';
@@ -12,6 +13,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   context.subscriptions.push(
     listManager.registerList(new DirsList()),
+    listManager.registerList(new FilesList()),
     commands.registerCommand('file.rename', async () => {
       const file = (await workspace.document).uri;
       if (!file) return;
