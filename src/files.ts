@@ -135,11 +135,11 @@ Note that rg ignore hidden files by default.`;
     });
     this.addAction('copy', async (item) => {
       if (!item.sortText) return;
-      window.showInformationMessage('Not yet implemented');
+      this.nvim.command('CocList dirs --type=copy --level=file --input=' + item.sortText);
     });
     this.addAction('move', async (item) => {
       if (!item.sortText) return;
-      window.showInformationMessage('Not yet implemented');
+      this.nvim.command('CocList dirs --type=move --level=file --input=' + item.sortText);
     });
   }
 

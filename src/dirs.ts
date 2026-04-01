@@ -84,18 +84,9 @@ export default class DirsList extends BasicList {
   public name = 'dirs';
   public readonly defaultAction = 'create(dir/file)';
   public description = 'List all dirs in current workspace';
+  public args: string[] = [];
   constructor() {
     super();
-    this.addAction('move to', async (item) => {
-      if (!item.sortText) return;
-      const file = (await workspace.document).uri;
-      const confirm = await createPrompt(
-        `Are you sure you want to move this file to ${item.sortText}?`
-      );
-      if (confirm) {
-        moveFile(file.split('file://')[1], item.sortText);
-      }
-    });
     this.addAction('rename', async (item) => {
       if (!item.sortText) return;
       const newName = await createInput('Enter the new name of this dir');
@@ -105,10 +96,13 @@ export default class DirsList extends BasicList {
         renameDir(item.sortText, newName);
       }
     });
-    this.addAction('copy to', async (item) => {
+    this.addAction('copy', async (item) => {
       if (!item.sortText) return;
-      const file = (await workspace.document).uri;
-      copyFile(file.split('file://')[1], item.sortText);
+      this.nvim.command('CocList dirs --type=copy --level=dir --input=' + item.sortText);
+    });
+    this.addAction('move', async (item) => {
+      if (!item.sortText) return;
+      this.nvim.command('CocList dirs --type=move --level=dir --input=' + item.sortText);
     });
     this.addAction('delete', async (item) => {
       if (!item.sortText) return;
@@ -118,11 +112,33 @@ export default class DirsList extends BasicList {
       }
     });
     this.addAction('create(dir/file)', async (item) => {
-      const fileName = await createInput(
-        'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
-      );
-      if (!fileName || fileName === 'outPut' || !item.sortText) return;
-      create(item.sortText, fileName);
+      if (this.args.some((a) => a.includes('--input'))) {
+        const value = this.args.find((a) => a.includes('--input'))?.split('=')[1];
+        const type = this.args.find((a) => a.includes('--type'));
+        const level = this.args.find((a) => a.includes('--level'))?.split('=')[1];
+        if (type && value && type.includes('move')) {
+          if (level && level == 'file') {
+            moveFile(value!, item.sortText!);
+          }
+          if (level && level == 'dir') {
+            window.showInformationMessage('Not yet implemented');
+          }
+        }
+        if (type && value && type.includes('copy')) {
+          if (level && level == 'file') {
+            copyFile(value!, item.sortText!);
+          }
+          if (level && level == 'dir') {
+            window.showInformationMessage('Not yet implemented');
+          }
+        }
+      } else {
+        const fileName = await createInput(
+          'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
+        );
+        if (!fileName || fileName === 'outPut' || !item.sortText) return;
+        create(item.sortText, fileName);
+      }
     });
   }
 
@@ -142,6 +158,9 @@ export default class DirsList extends BasicList {
     if (!res) return null;
     let used = res.args.concat(['-F', '-folder', '-W', '-workspace']);
     let extraArgs = args.filter((s) => used.indexOf(s) == -1);
+    this.args = args;
+    args = [];
+    extraArgs = [];
     let cwds: string[];
     let dirArgs: string[] = [];
     let searchArgs: string[] = [];
