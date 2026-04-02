@@ -37,28 +37,7 @@
         }
       }
     },
-    "commands": [
-      {
-        "command": "file.delete",
-        "title": "Delete the current file ."
-      },
-      {
-        "command": "file.deleteDir",
-        "title": "Delete the folder where the current file is located ."
-      },
-      {
-        "command": "file.create",
-        "title": "Create files or folders in the root directory of the current project ."
-      },
-      {
-        "command": "file.rename",
-        "title": "Rename the current file ."
-      },
-      {
-        "command": "file.renameDir",
-        "title": "Rename the folder where the current file is located ."
-      }
-    ]
+    "commands": []
   },
   "dependencies": {
     "minimatch": "^10.2.4",
