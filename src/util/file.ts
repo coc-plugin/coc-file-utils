@@ -21,7 +21,7 @@ export async function create(basePath: string, name: string): Promise<void> {
 
         await fs.mkdir(dirPath, { recursive: true });
         await fs.writeFile(filePath, '');
-
+        await nvim.command(`edit ${filePath}`);
         window.showInformationMessage(`File created: ${filePath}`);
       }
     } catch (err: any) {
@@ -85,8 +85,6 @@ export async function copyFile(srcFilePath: string, destPath: string): Promise<v
 
     await fs.mkdir(destPath, { recursive: true });
     await fs.copyFile(srcFilePath, destFilePath);
-
-    nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File copied to: ${destFilePath}`);
   } catch (err: any) {
     window.showErrorMessage(`Failed to copy file: ${err.message}`);
@@ -127,7 +125,6 @@ export async function moveFile(srcFilePath: string, destPath: string): Promise<v
 
     await fs.rename(srcFilePath, destFilePath);
 
-    nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File moved to: ${destFilePath}`);
   } catch (err: any) {
     window.showErrorMessage(`Failed to move file: ${err.message}`);
@@ -169,6 +166,7 @@ export async function renameFile(srcFilePath: string, newName: string): Promise<
 
     await closeFileBuffer(srcFilePath).catch(() => {});
     await fs.rename(srcFilePath, destFilePath);
+    await nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File renamed to: ${destFilePath}`);
   } catch (err: any) {
     window.showErrorMessage(`Failed to rename file: ${err.message}`);
