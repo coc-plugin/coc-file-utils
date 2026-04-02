@@ -31,18 +31,6 @@ The best way to create, copy, move, rename and delete file and folder
 `:CocList dirs`
 `:CocList files2`
 
-## commands
-
-`:CocCommand file.create` Create files or folders in the root directory of the current project
-
-`:CocCommand file.delete` Delete the current file
-
-`:CocCommand file.rename` Rename the current file
-
-`:CocCommand file.deleteDir` Delete the folder where the current file is located
-
-`:CocCommand file.renameDir` Rename the folder where the current file is located
-
 ## License
 
 MIT
