@@ -1,14 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
-import {
-  BasicList,
-  ListContext,
-  ListTask,
-  Location,
-  Range,
-  Uri,
-  window,
-  workspace,
-} from 'coc.nvim';
+import { BasicList, ListContext, ListTask, Location, Range, Uri, workspace } from 'coc.nvim';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
@@ -89,9 +80,10 @@ export default class DirsList extends BasicList {
     super();
     this.addAction('rename', async (item) => {
       if (!item.sortText) return;
-      const newName = await createInput('Enter the new name of this dir');
+      const name = path.basename(item.sortText);
+      const newName = await createInput('Enter the new name of this dir', name);
       if (!newName || newName === 'outPut') return;
-      const confirm = await createPrompt(`Are you sure you want to rename this dir to ${newName}?`);
+      const confirm = await createPrompt(`Are you sure you want to rename ${name} to ${newName}?`);
       if (confirm) {
         renameDir(item.sortText, newName);
       }
@@ -119,7 +111,7 @@ export default class DirsList extends BasicList {
         if (type && value && type.includes('move')) {
           if (level && level == 'file') {
             const confirm = await createPrompt(
-              `Are you sure you want to move this file to ${value}?`
+              `Are you sure you want to move ${value} to ${item.sortText}?`
             );
             if (confirm) {
               moveFile(value!, item.sortText!);
@@ -127,7 +119,7 @@ export default class DirsList extends BasicList {
           }
           if (level && level == 'dir') {
             const confirm = await createPrompt(
-              `Are you sure you want to move this dir to ${value}?`
+              `Are you sure you want to move ${value} to ${item.sortText}?`
             );
             if (confirm) {
               moveDir(value!, item.sortText!);
@@ -137,7 +129,7 @@ export default class DirsList extends BasicList {
         if (type && value && type.includes('copy')) {
           if (level && level == 'file') {
             const confirm = await createPrompt(
-              `Are you sure you want to copy this file to ${value}?`
+              `Are you sure you want to copy ${value} to ${item.sortText}?`
             );
             if (confirm) {
               copyFile(value!, item.sortText!);
@@ -145,7 +137,7 @@ export default class DirsList extends BasicList {
           }
           if (level && level == 'dir') {
             const confirm = await createPrompt(
-              `Are you sure you want to copy this dir to ${value}?`
+              `Are you sure you want to copy ${value} to ${item.sortText}?`
             );
             if (confirm) {
               copyDir(value!, item.sortText!);
