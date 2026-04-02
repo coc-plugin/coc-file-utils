@@ -93,6 +93,24 @@ export async function copyFile(srcFilePath: string, destPath: string): Promise<v
   }
 }
 
+export async function copyDir(srcDirPath: string, destPath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcDirPath);
+    if (!stat.isDirectory()) {
+      window.showErrorMessage(`Not a directory: ${srcDirPath}`);
+      return;
+    }
+    const dirName = path.basename(srcDirPath);
+    const destDirPath = path.join(destPath, dirName);
+
+    await fs.mkdir(destPath, { recursive: true });
+    await fs.cp(srcDirPath, destDirPath, { recursive: true });
+    window.showInformationMessage(`Directory copied to: ${destDirPath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to copy directory: ${err.message}`);
+  }
+}
+
 export async function moveFile(srcFilePath: string, destPath: string): Promise<void> {
   try {
     const stat = await fs.stat(srcFilePath);
@@ -113,6 +131,26 @@ export async function moveFile(srcFilePath: string, destPath: string): Promise<v
     window.showInformationMessage(`File moved to: ${destFilePath}`);
   } catch (err: any) {
     window.showErrorMessage(`Failed to move file: ${err.message}`);
+  }
+}
+
+export async function moveDir(srcDirPath: string, destPath: string): Promise<void> {
+  try {
+    const stat = await fs.stat(srcDirPath);
+    if (!stat.isDirectory()) {
+      window.showErrorMessage(`Not a directory: ${srcDirPath}`);
+      return;
+    }
+
+    const dirName = path.basename(srcDirPath);
+    const destDirPath = path.join(destPath, dirName);
+
+    await fs.mkdir(destPath, { recursive: true });
+    await closeDirBuffers(srcDirPath).catch(() => {});
+    await fs.rename(srcDirPath, destDirPath);
+    window.showInformationMessage(`Directory moved to: ${destDirPath}`);
+  } catch (err: any) {
+    window.showErrorMessage(`Failed to move directory: ${err.message}`);
   }
 }
 

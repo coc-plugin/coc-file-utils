@@ -15,7 +15,7 @@ import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
 import { createInput, createPrompt } from './util/ui';
-import { create, deleteDir, moveFile, copyFile, renameDir } from './util/file';
+import { create, deleteDir, moveFile, copyFile, renameDir, copyDir, moveDir } from './util/file';
 import { executable } from './util';
 
 class Task extends EventEmitter implements ListTask {
@@ -118,18 +118,38 @@ export default class DirsList extends BasicList {
         const level = this.args.find((a) => a.includes('--level'))?.split('=')[1];
         if (type && value && type.includes('move')) {
           if (level && level == 'file') {
-            moveFile(value!, item.sortText!);
+            const confirm = await createPrompt(
+              `Are you sure you want to move this file to ${value}?`
+            );
+            if (confirm) {
+              moveFile(value!, item.sortText!);
+            }
           }
           if (level && level == 'dir') {
-            window.showInformationMessage('Not yet implemented');
+            const confirm = await createPrompt(
+              `Are you sure you want to move this dir to ${value}?`
+            );
+            if (confirm) {
+              moveDir(value!, item.sortText!);
+            }
           }
         }
         if (type && value && type.includes('copy')) {
           if (level && level == 'file') {
-            copyFile(value!, item.sortText!);
+            const confirm = await createPrompt(
+              `Are you sure you want to copy this file to ${value}?`
+            );
+            if (confirm) {
+              copyFile(value!, item.sortText!);
+            }
           }
           if (level && level == 'dir') {
-            window.showInformationMessage('Not yet implemented');
+            const confirm = await createPrompt(
+              `Are you sure you want to copy this dir to ${value}?`
+            );
+            if (confirm) {
+              copyDir(value!, item.sortText!);
+            }
           }
         }
       } else {
