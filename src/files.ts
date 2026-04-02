@@ -1,14 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
-import {
-  BasicList,
-  ListContext,
-  ListTask,
-  Location,
-  Range,
-  Uri,
-  window,
-  workspace,
-} from 'coc.nvim';
+import { BasicList, ListContext, ListTask, Location, Range, Uri, workspace } from 'coc.nvim';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
