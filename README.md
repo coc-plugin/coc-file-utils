@@ -6,6 +6,11 @@ The best way to create, copy, move, rename and delete file and folder
 
 `:CocInstall coc-file-utils`
 
+## Configuration options
+
+- `coc-file-utils.enabled`: Enable coc-file-utils extension, default: `true`
+- `coc-file-utils.excludePatterns`: Glob patterns to exclude files and folders from file operations, default : `["**/node_modules/**","**/.git/**"]`.
+
 ## Lists
 
 `:CocList filemanager`

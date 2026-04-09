@@ -17,6 +17,7 @@ import readline from 'readline';
 import { executable } from './util';
 import { createPrompt } from './util/ui';
 import { copyDir, copyFile, moveDir, moveFile } from './util/file';
+import { getConfigItem } from './config';
 
 class Task extends EventEmitter implements ListTask {
   private processes: ChildProcess[] = [];
@@ -175,7 +176,7 @@ export default class FilesList extends BasicList {
       }
     }
     let task = new Task();
-    const excludePatterns = ['**/node_modules/**', '**/.git/**'];
+    const excludePatterns = getConfigItem('excludePatterns', []);
     task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns);
     return task;
   }

@@ -18,6 +18,7 @@ import { executable, findGitRoot, generateFolders } from './util';
 import { Transform } from 'stream';
 import { createInput, createPrompt } from './util/ui';
 import { create, deleteDir, deleteFile, renameDir, renameFile } from './util/file';
+import { getConfigItem } from './config';
 
 class Task extends EventEmitter implements ListTask {
   private processes: ChildProcess[] = [];
@@ -317,7 +318,7 @@ Use -folder or -workspace to change search scope.`;
       }
     }
     let task = new Task();
-    const excludePatterns = ['**/node_modules/**', '**/.git/**'];
+    const excludePatterns = getConfigItem('excludePatterns', []);
     task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns);
     return task;
   }

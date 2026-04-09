@@ -1,6 +1,6 @@
 {
   "name": "coc-file-utils",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "The best way to create, copy, move, rename and delete files and folders (multiple files)",
   "author": "cyl <a1008611abcd@126.com>",
   "license": "MIT",
@@ -34,6 +34,14 @@
           "type": "boolean",
           "default": true,
           "description": "Enable coc-file-utils extension"
+        },
+        "coc-file-utils.excludePatterns": {
+          "type": "array",
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**"
+          ],
+          "description": "Glob patterns to exclude files and folders from file operations"
         }
       }
     },
