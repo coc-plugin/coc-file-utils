@@ -5,24 +5,55 @@ import fs from 'fs';
 import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
-import { executable } from './util';
+import { executable, generateFolders } from './util';
+import { Transform } from 'stream';
 import { createInput, createPrompt } from './util/ui';
-import { deleteFile, renameFile } from './util/file';
+import { create, deleteDir, deleteFile, renameDir, renameFile } from './util/file';
 
 class Task extends EventEmitter implements ListTask {
   private processes: ChildProcess[] = [];
-
+  private seen: Set<string> | null = null;
+  constructor() {
+    super();
+    this.processes = [];
+    this.seen = null;
+  }
   public start(cmd: string, args: string[], cwds: string[], patterns: string[]): void {
     let remain = cwds.length;
     let config = workspace.getConfiguration('list.source.files');
     let filterByName = config.get<boolean>('filterByName', false);
+    const that = this;
+    if (!that.seen) {
+      that.seen = new Set<string>();
+    } else {
+      that.seen.clear();
+    }
     for (let cwd of cwds) {
       let process = spawn(cmd, args, { cwd });
-      this.processes.push(process);
+      process.stdout.push('/\n');
+      const formatter = new Transform({
+        objectMode: false,
+        transform(chunk, _encoding, callback) {
+          let text = chunk.toString();
+          const paths = generateFolders(text);
+          paths.forEach((p) => {
+            if (that.seen && !that.seen.has(p)) {
+              that.seen.add(p);
+              this.push(p + '\n');
+            }
+          });
+          callback();
+        },
+      });
+      process.stdout.pipe(formatter);
       process.on('error', (e) => {
         this.emit('error', e.message);
       });
-      const rl = readline.createInterface(process.stdout);
+      const rl = readline.createInterface({
+        input: formatter,
+        crlfDelay: Infinity,
+      });
+      this.processes.push(process);
       const range = Range.create(0, 0, 0, 0);
       let hasPattern = patterns.length > 0;
       process.stderr.on('data', (chunk) => {
@@ -71,15 +102,18 @@ class Task extends EventEmitter implements ListTask {
 }
 
 export default class FilesList extends BasicList {
-  public readonly name = 'files2';
+  public readonly name = 'filemanager';
   public readonly defaultAction = 'open';
-  public description = 'Search files by rg or ag';
-  public readonly detail = `Install ripgrep in your $PATH to have best experience.
-Files is searched from current cwd by default.
-Provide directory names as arguments to search other directories.
-Use 'list.source.files.command' configuration for custom search command.
-Use 'list.source.files.args' configuration for custom command arguments.
-Note that rg ignore hidden files by default.`;
+  public description = 'File manager';
+  public readonly detail = `File manager with full support for files and directories.
+Features:
+- Browse files and folders
+- Create, delete, rename, copy and move
+- Quick create inside folders
+- Split screen support
+
+Use -folder or -workspace to change search scope.`;
+  public args: string[] = [];
   public options = [
     {
       name: '-F, -folder',
@@ -91,30 +125,74 @@ Note that rg ignore hidden files by default.`;
     },
   ];
 
+  isDir(path: string): boolean {
+    try {
+      return fs.lstatSync(path).isDirectory();
+    } catch (e) {
+      return false;
+    }
+  }
+
   constructor() {
     super();
     this.addAction('rename', async (item) => {
       if (!item.sortText) return;
-      const newName = await createInput(
-        'Enter the new name for the file:',
-        path.basename(item.sortText)
-      );
-      if (!newName || newName == 'outPut') return;
-      const status = await createPrompt('Are you sure you want to rename this file?');
-      if (status) {
-        renameFile(item.sortText, newName);
+      const isDirectory = this.isDir(item.sortText);
+      let name: string;
+      let newName: string;
+      if (isDirectory) {
+        name = path.dirname(item.sortText);
+        newName = await createInput('Enter the new name of this dir', name);
+      } else {
+        name = path.basename(item.sortText);
+        newName = await createInput('Enter the new name of this file', name);
       }
+      if (!newName || newName === 'outPut') return;
+      const confirm = await createPrompt(`Are you sure you want to rename ${name} to ${newName}?`);
+      if (confirm) {
+        if (isDirectory) {
+          renameDir(item.sortText, newName);
+        } else {
+          renameFile(item.sortText, newName);
+        }
+      }
+    });
+    this.addAction('copy', async (item) => {
+      if (!item.sortText) return;
+      const isDirectory = this.isDir(item.sortText);
+      const level = isDirectory ? 'dir' : 'file';
+      this.nvim.command(`CocList dirs --type=copy --level=${level} --input=${item.sortText}`);
+    });
+    this.addAction('move', async (item) => {
+      if (!item.sortText) return;
+      const isDirectory = this.isDir(item.sortText);
+      const level = isDirectory ? 'dir' : 'file';
+      this.nvim.command(`CocList dirs --type=move --level=${level} --input=${item.sortText}`);
     });
     this.addAction('delete', async (item) => {
       if (!item.sortText) return;
-      const status = await createPrompt('Are you sure you want to delete this file?');
-      if (status) {
-        deleteFile(item.sortText);
+      const isDirectory = this.isDir(item.sortText);
+      const confirm = await createPrompt(`Are you sure you want to delete ${item.sortText}?`);
+      if (confirm) {
+        if (isDirectory) {
+          deleteDir(item.sortText);
+        } else {
+          deleteFile(item.sortText);
+        }
       }
     });
     this.addAction('open', async (item) => {
       if (!item.sortText) return;
-      this.nvim.command(`:e ${item.sortText}`);
+      const isDirectory = this.isDir(item.sortText);
+      if (isDirectory) {
+        const fileName = await createInput(
+          'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
+        );
+        if (!fileName || fileName === 'outPut' || !item.sortText) return;
+        create(item.sortText, fileName);
+      } else {
+        this.nvim.command(`:e ${item.sortText}`);
+      }
     });
     this.addAction('vsplit', async (item) => {
       if (!item.sortText) return;
@@ -123,14 +201,6 @@ Note that rg ignore hidden files by default.`;
     this.addAction('split', async (item) => {
       if (!item.sortText) return;
       this.nvim.command(`:split ${item.sortText}`);
-    });
-    this.addAction('copy', async (item) => {
-      if (!item.sortText) return;
-      this.nvim.command('CocList dirs --type=copy --level=file --input=' + item.sortText);
-    });
-    this.addAction('move', async (item) => {
-      if (!item.sortText) return;
-      this.nvim.command('CocList dirs --type=move --level=file --input=' + item.sortText);
     });
   }
 
@@ -167,6 +237,7 @@ Note that rg ignore hidden files by default.`;
     if (!res) return null;
     let used = res.args.concat(['-F', '-folder', '-W', '-workspace']);
     let extraArgs = args.filter((s) => used.indexOf(s) == -1);
+    this.args = args;
     let cwds: string[];
     let dirArgs: string[] = [];
     let searchArgs: string[] = [];

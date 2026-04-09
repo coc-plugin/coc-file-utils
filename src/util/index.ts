@@ -1,32 +1,32 @@
-import which from 'which'
-import path from 'path'
+import which from 'which';
+import path from 'path';
 
 export function executable(cmd: string): boolean {
   try {
-    which.sync(cmd)
+    which.sync(cmd);
   } catch (e) {
-    return false
+    return false;
   }
-  return true
+  return true;
 }
 
 export function characterIndex(content: string, byteIndex: number): number {
-  let buf = Buffer.from(content, 'utf8')
-  return buf.slice(0, byteIndex).toString('utf8').length
+  let buf = Buffer.from(content, 'utf8');
+  return buf.slice(0, byteIndex).toString('utf8').length;
 }
 
 export function wait(ms: number): Promise<any> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(undefined)
-    }, ms)
-  })
+      resolve(undefined);
+    }, ms);
+  });
 }
 
 export function pad(n: string, total: number): string {
-  let l = total - n.length
-  if (l <= 0) return ''
-  return ((new Array(l)).fill(' ').join(''))
+  let l = total - n.length;
+  if (l <= 0) return '';
+  return new Array(l).fill(' ').join('');
 }
 
 /**
@@ -36,24 +36,53 @@ export function pad(n: string, total: number): string {
 export function distinct<T>(array: T[], keyFn?: (t: T) => string): T[] {
   if (!keyFn) {
     return array.filter((element, position) => {
-      return array.indexOf(element) === position
-    })
+      return array.indexOf(element) === position;
+    });
   }
 
-  const seen: { [key: string]: boolean } = Object.create(null)
-  return array.filter(elem => {
-    const key = keyFn(elem)
+  const seen: { [key: string]: boolean } = Object.create(null);
+  return array.filter((elem) => {
+    const key = keyFn(elem);
     if (seen[key]) {
-      return false
+      return false;
     }
 
-    seen[key] = true
+    seen[key] = true;
 
-    return true
-  })
+    return true;
+  });
 }
 
 export function isParentFolder(folder: string, filepath: string): boolean {
-  let rel = path.relative(folder, filepath)
-  return !rel.startsWith('..')
+  let rel = path.relative(folder, filepath);
+  return !rel.startsWith('..');
+}
+
+export function generateFolders(data: string) {
+  const lines = data
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const files: string[] = [];
+  const folderSet = new Set<string>();
+
+  lines.forEach((path) => {
+    if (path.endsWith('/')) {
+      folderSet.add(path);
+    } else {
+      files.push(path);
+
+      const parts = path.split('/');
+      if (parts.length > 1) {
+        let currentDir = '';
+        for (let i = 0; i < parts.length - 1; i++) {
+          currentDir = i === 0 ? parts[i] : `${currentDir}/${parts[i]}`;
+          folderSet.add(currentDir + '/');
+        }
+      }
+    }
+  });
+
+  const folders = Array.from(folderSet).sort();
+  return [...folders, ...files];
 }

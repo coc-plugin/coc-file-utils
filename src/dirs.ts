@@ -1,21 +1,28 @@
 import { ChildProcess, spawn } from 'child_process';
-import { BasicList, ListContext, ListTask, Location, Range, Uri, workspace } from 'coc.nvim';
+import {
+  BasicList,
+  ListContext,
+  ListTask,
+  Location,
+  Range,
+  Uri,
+  window,
+  workspace,
+} from 'coc.nvim';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
-import { createInput, createPrompt } from './util/ui';
-import { create, deleteDir, moveFile, copyFile, renameDir, copyDir, moveDir } from './util/file';
 import { executable } from './util';
+import { createPrompt } from './util/ui';
+import { copyDir, copyFile, moveDir, moveFile } from './util/file';
 
 class Task extends EventEmitter implements ListTask {
   private processes: ChildProcess[] = [];
 
   public start(cmd: string, args: string[], cwds: string[], patterns: string[]): void {
     let remain = cwds.length;
-    let config = workspace.getConfiguration('list.source.files');
-    let filterByName = config.get<boolean>('filterByName', false);
     for (let cwd of cwds) {
       let process = spawn(cmd, args, { cwd });
       process.stdout.push('/\n');
@@ -37,21 +44,11 @@ class Task extends EventEmitter implements ListTask {
         }
         if (hasPattern && patterns.some((p) => minimatch.minimatch(file, p))) return;
         let location = Location.create(Uri.file(file).toString(), range);
-        if (!filterByName) {
-          this.emit('data', {
-            label: line,
-            sortText: file,
-            location,
-          });
-        } else {
-          let name = path.basename(file);
-          this.emit('data', {
-            label: `${name}\t${line}`,
-            sortText: file,
-            filterText: name,
-            location,
-          });
-        }
+        this.emit('data', {
+          label: line,
+          sortText: file,
+          location,
+        });
       });
       rl.on('close', () => {
         remain = remain - 1;
@@ -71,39 +68,15 @@ class Task extends EventEmitter implements ListTask {
   }
 }
 
-export default class DirsList extends BasicList {
+export default class FilesList extends BasicList {
   public name = 'dirs';
-  public readonly defaultAction = 'create(dir/file)';
-  public description = 'List all dirs in current workspace';
+  public readonly defaultAction = 'open';
+  public description = 'move or copy';
   public args: string[] = [];
+
   constructor() {
     super();
-    this.addAction('rename', async (item) => {
-      if (!item.sortText) return;
-      const name = path.basename(item.sortText);
-      const newName = await createInput('Enter the new name of this dir', name);
-      if (!newName || newName === 'outPut') return;
-      const confirm = await createPrompt(`Are you sure you want to rename ${name} to ${newName}?`);
-      if (confirm) {
-        renameDir(item.sortText, newName);
-      }
-    });
-    this.addAction('copy', async (item) => {
-      if (!item.sortText) return;
-      this.nvim.command('CocList dirs --type=copy --level=dir --input=' + item.sortText);
-    });
-    this.addAction('move', async (item) => {
-      if (!item.sortText) return;
-      this.nvim.command('CocList dirs --type=move --level=dir --input=' + item.sortText);
-    });
-    this.addAction('delete', async (item) => {
-      if (!item.sortText) return;
-      const confirm = await createPrompt(`Are you sure you want to delete ${item.sortText}?`);
-      if (confirm) {
-        deleteDir(item.sortText);
-      }
-    });
-    this.addAction('create(dir/file)', async (item) => {
+    this.addAction('open', async (item) => {
       if (this.args.some((a) => a.includes('--input'))) {
         const value = this.args.find((a) => a.includes('--input'))?.split('=')[1];
         const type = this.args.find((a) => a.includes('--type'));
@@ -145,11 +118,8 @@ export default class DirsList extends BasicList {
           }
         }
       } else {
-        const fileName = await createInput(
-          'Enter the dir/file name to be created. Dirs end with "/" . separated with "," .'
-        );
-        if (!fileName || fileName === 'outPut' || !item.sortText) return;
-        create(item.sortText, fileName);
+        window.showErrorMessage('Invalid action, missing --input and --type arguments', 'error');
+        return;
       }
     });
   }
@@ -168,11 +138,8 @@ export default class DirsList extends BasicList {
     let options = this.parseArguments(args);
     let res = this.getCommand();
     if (!res) return null;
-    let used = res.args.concat(['-F', '-folder', '-W', '-workspace']);
-    let extraArgs = args.filter((s) => used.indexOf(s) == -1);
     this.args = args;
-    args = [];
-    extraArgs = [];
+    let extraArgs = [];
     let cwds: string[];
     let dirArgs: string[] = [];
     let searchArgs: string[] = [];
