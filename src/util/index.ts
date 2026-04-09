@@ -1,5 +1,6 @@
-import which from 'which';
+import fs from 'fs';
 import path from 'path';
+import which from 'which';
 
 export function executable(cmd: string): boolean {
   try {
@@ -85,4 +86,32 @@ export function generateFolders(data: string) {
 
   const folders = Array.from(folderSet).sort();
   return [...folders, ...files];
+}
+
+export function findGitRoot(startPath: string): string | null {
+  let currentDir = startPath;
+  // Prevent infinite loop by checking if we reached the filesystem root
+  const root = path.parse(currentDir).root;
+
+  while (true) {
+    const gitPath = path.join(currentDir, '.git');
+    try {
+      if (fs.existsSync(gitPath)) {
+        return currentDir;
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+
+    if (currentDir === root) {
+      return null; // No git root found
+    }
+
+    // Move up one directory
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      return null; // Safety check for root
+    }
+    currentDir = parentDir;
+  }
 }

@@ -14,7 +14,7 @@ import fs from 'fs';
 import * as minimatch from 'minimatch';
 import path from 'path';
 import readline from 'readline';
-import { executable, generateFolders } from './util';
+import { executable, findGitRoot, generateFolders } from './util';
 import { Transform } from 'stream';
 import { createInput, createPrompt } from './util/ui';
 import { create, deleteDir, deleteFile, renameDir, renameFile } from './util/file';
@@ -131,6 +131,10 @@ Use -folder or -workspace to change search scope.`;
     {
       name: '-W, -workspace',
       description: 'Search files from all workspace folders instead of cwd.',
+    },
+    {
+      name: '-G, -git',
+      description: 'Search files from the git repository root.',
     },
   ];
 
@@ -273,7 +277,7 @@ Use -folder or -workspace to change search scope.`;
     let options = this.parseArguments(args);
     let res = this.getCommand();
     if (!res) return null;
-    let used = res.args.concat(['-F', '-folder', '-W', '-workspace']);
+    let used = res.args.concat(['-F', '-folder', '-W', '-workspace', '-G', '-git']);
     let extraArgs = args.filter((s) => used.indexOf(s) == -1);
     this.args = args;
     let cwds: string[];
@@ -283,6 +287,31 @@ Use -folder or -workspace to change search scope.`;
       cwds = [workspace.root];
     } else if (options.workspace) {
       cwds = workspace.workspaceFolders.map((f) => Uri.parse(f.uri).fsPath);
+    } else if (options.git) {
+      let startPath: string;
+      const bufname = (await nvim.call('expand', '%:p')) as string;
+      if (bufname && bufname !== '') {
+        startPath = path.dirname(bufname);
+      } else {
+        let valid = await window.valid;
+        if (valid) {
+          startPath = (await nvim.call('getcwd', window.id)) as string;
+        } else {
+          startPath = (await nvim.call('getcwd')) as string;
+        }
+      }
+
+      const gitRoot = findGitRoot(startPath);
+      if (gitRoot) {
+        cwds = [gitRoot];
+      } else {
+        let valid = await window.valid;
+        if (valid) {
+          cwds = [(await nvim.call('getcwd', window.id)) as string];
+        } else {
+          cwds = [(await nvim.call('getcwd')) as string];
+        }
+      }
     } else {
       if (extraArgs.length > 0) {
         // tslint:disable-next-line: prefer-for-of
