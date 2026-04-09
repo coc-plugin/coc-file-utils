@@ -1,5 +1,14 @@
 import { ChildProcess, spawn } from 'child_process';
-import { BasicList, ListContext, ListTask, Location, Range, Uri, workspace } from 'coc.nvim';
+import {
+  BasicList,
+  ListContext,
+  ListTask,
+  Location,
+  Range,
+  Uri,
+  window,
+  workspace,
+} from 'coc.nvim';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
@@ -196,10 +205,20 @@ Use -folder or -workspace to change search scope.`;
     });
     this.addAction('vsplit', async (item) => {
       if (!item.sortText) return;
+      const isDirectory = this.isDir(item.sortText);
+      if (isDirectory) {
+        window.showInformationMessage("Can't open directory in vsplit");
+        return;
+      }
       this.nvim.command(`:vsplit ${item.sortText}`);
     });
     this.addAction('split', async (item) => {
       if (!item.sortText) return;
+      const isDirectory = this.isDir(item.sortText);
+      if (isDirectory) {
+        window.showInformationMessage("Can't open directory in split");
+        return;
+      }
       this.nvim.command(`:split ${item.sortText}`);
     });
   }
