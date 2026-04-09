@@ -29,8 +29,6 @@ class Task extends EventEmitter implements ListTask {
   }
   public start(cmd: string, args: string[], cwds: string[], patterns: string[]): void {
     let remain = cwds.length;
-    let config = workspace.getConfiguration('list.source.files');
-    let filterByName = config.get<boolean>('filterByName', false);
     const that = this;
     if (!that.seen) {
       that.seen = new Set<string>();
@@ -76,21 +74,11 @@ class Task extends EventEmitter implements ListTask {
         }
         if (hasPattern && patterns.some((p) => minimatch.minimatch(file, p))) return;
         let location = Location.create(Uri.file(file).toString(), range);
-        if (!filterByName) {
-          this.emit('data', {
-            label: line,
-            sortText: file,
-            location,
-          });
-        } else {
-          let name = path.basename(file);
-          this.emit('data', {
-            label: `${name}\t${line}`,
-            sortText: file,
-            filterText: name,
-            location,
-          });
-        }
+        this.emit('data', {
+          label: line,
+          sortText: file,
+          location,
+        });
       });
       rl.on('close', () => {
         remain = remain - 1;
@@ -246,28 +234,17 @@ Use -folder or -workspace to change search scope.`;
     });
   }
 
-  private getArgs(args: string[], defaultArgs: string[]): string[] {
-    return args.length ? args : defaultArgs;
-  }
-
   public getCommand(): { cmd: string; args: string[] } {
-    let config = workspace.getConfiguration('list.source.files');
-    let cmd = config.get<string>('command', '');
-    let args = config.get<string[]>('args', []);
-    if (!cmd) {
-      if (executable('rg')) {
-        return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files']) };
-      } else if (executable('ag')) {
-        return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor']) };
-      } else if (process.platform == 'win32') {
-        return { cmd: 'dir', args: this.getArgs(args, ['/a-D', '/S', '/B']) };
-      } else if (executable('find')) {
-        return { cmd: 'find', args: this.getArgs(args, ['.', '-type', 'f']) };
-      } else {
-        throw new Error('Unable to find command for files list.');
-      }
+    if (executable('rg')) {
+      return { cmd: 'rg', args: ['--color', 'never', '--files', '--hidden'] };
+    } else if (executable('ag')) {
+      return { cmd: 'ag', args: ['-f', '-g', '.', '--nocolor', '--hidden'] };
+    } else if (process.platform == 'win32') {
+      return { cmd: 'dir', args: ['/a-D', '/S', '/B'] };
+    } else if (executable('find')) {
+      return { cmd: 'find', args: ['.', '-type', 'f'] };
     } else {
-      return { cmd, args };
+      throw new Error('Unable to find command for files list.');
     }
   }
 
@@ -340,20 +317,16 @@ Use -folder or -workspace to change search scope.`;
       }
     }
     let task = new Task();
-    let excludePatterns = this.getConfig().get<string[]>('excludePatterns', []);
+    const excludePatterns = ['**/node_modules/**', '**/.git/**'];
     task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns);
     return task;
   }
 
   public doHighlight(): void {
-    let config = workspace.getConfiguration('list.source.files');
-    let filterByName = config.get<boolean>('filterByName', false);
-    if (filterByName) {
-      let { nvim } = this;
-      nvim.pauseNotification();
-      nvim.command('syntax match CocFilesFile /\\t.*$/ contained containedin=CocFilesLine', true);
-      nvim.command('highlight default link CocFilesFile Comment', true);
-      nvim.resumeNotification(false, true);
-    }
+    let { nvim } = this;
+    nvim.pauseNotification();
+    nvim.command('syntax match CocFilesFile /\\t.*$/ contained containedin=CocFilesLine', true);
+    nvim.command('highlight default link CocFilesFile Comment', true);
+    nvim.resumeNotification(false, true);
   }
 }

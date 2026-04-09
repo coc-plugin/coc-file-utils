@@ -126,7 +126,7 @@ export default class FilesList extends BasicList {
 
   public getCommand(): { cmd: string; args: string[] } {
     if (executable('fd')) {
-      return { cmd: 'fd', args: ['--color', 'never', '--type', 'directory'] };
+      return { cmd: 'fd', args: ['--color', 'never', '--type', 'directory', '-H'] };
     } else {
       throw new Error('Unable to find command for dirs list.');
     }
@@ -175,20 +175,16 @@ export default class FilesList extends BasicList {
       }
     }
     let task = new Task();
-    let excludePatterns = this.getConfig().get<string[]>('excludePatterns', []);
+    const excludePatterns = ['**/node_modules/**', '**/.git/**'];
     task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns);
     return task;
   }
 
   public doHighlight(): void {
-    let config = workspace.getConfiguration('list.source.files');
-    let filterByName = config.get<boolean>('filterByName', false);
-    if (filterByName) {
-      let { nvim } = this;
-      nvim.pauseNotification();
-      nvim.command('syntax match CocFilesFile /\\t.*$/ contained containedin=CocFilesLine', true);
-      nvim.command('highlight default link CocFilesFile Comment', true);
-      nvim.resumeNotification(false, true);
-    }
+    let { nvim } = this;
+    nvim.pauseNotification();
+    nvim.command('syntax match CocFilesFile /\\t.*$/ contained containedin=CocFilesLine', true);
+    nvim.command('highlight default link CocFilesFile Comment', true);
+    nvim.resumeNotification(false, true);
   }
 }
