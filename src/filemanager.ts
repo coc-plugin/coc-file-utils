@@ -221,6 +221,24 @@ Use -folder or -workspace to change search scope.`;
       }
       this.nvim.command(`:split ${item.sortText}`);
     });
+    this.addAction('copy absolute pathname', async (item) => {
+      if (!item.sortText) return;
+      await this.nvim.call('setreg', ['+', item.sortText]);
+    });
+    this.addAction('copy relative pathname', async (item) => {
+      if (!item.sortText) return;
+      const cwd = (await this.nvim.call('getcwd')) as string;
+      let relativePath = path.relative(cwd, item.sortText);
+      if (process.platform === 'win32') {
+        relativePath = relativePath.replace(/\\/g, '/');
+      }
+      await this.nvim.call('setreg', ['+', relativePath]);
+    });
+    this.addAction('copy filename', async (item) => {
+      if (!item.sortText) return;
+      const filename = path.basename(item.sortText);
+      await this.nvim.call('setreg', ['+', filename]);
+    });
   }
 
   private getArgs(args: string[], defaultArgs: string[]): string[] {
