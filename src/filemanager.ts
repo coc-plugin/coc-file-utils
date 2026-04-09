@@ -224,6 +224,7 @@ Use -folder or -workspace to change search scope.`;
     this.addAction('copy absolute pathname', async (item) => {
       if (!item.sortText) return;
       await this.nvim.call('setreg', ['+', item.sortText]);
+      window.showInformationMessage('Absolute path copied to clipboard');
     });
     this.addAction('copy relative pathname', async (item) => {
       if (!item.sortText) return;
@@ -233,11 +234,13 @@ Use -folder or -workspace to change search scope.`;
         relativePath = relativePath.replace(/\\/g, '/');
       }
       await this.nvim.call('setreg', ['+', relativePath]);
+      window.showInformationMessage('Relative path copied to clipboard');
     });
     this.addAction('copy filename', async (item) => {
       if (!item.sortText) return;
       const filename = path.basename(item.sortText);
       await this.nvim.call('setreg', ['+', filename]);
+      window.showInformationMessage('Filename copied to clipboard');
     });
   }
 
