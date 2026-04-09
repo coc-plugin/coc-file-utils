@@ -147,13 +147,11 @@ Use -folder or -workspace to change search scope.`;
     this.addAction('rename', async (item) => {
       if (!item.sortText) return;
       const isDirectory = this.isDir(item.sortText);
-      let name: string;
+      let name = path.basename(item.sortText);
       let newName: string;
       if (isDirectory) {
-        name = path.dirname(item.sortText);
         newName = await createInput('Enter the new name of this dir', name);
       } else {
-        name = path.basename(item.sortText);
         newName = await createInput('Enter the new name of this file', name);
       }
       if (!newName || newName === 'outPut') return;
