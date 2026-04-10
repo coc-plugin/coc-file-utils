@@ -21,6 +21,8 @@ Q: How to select the current file by default?
 
 A: Create custom keymap like:
 
+lua
+
 ```lua
 vim.keymap.set('n', '<leader>n', function()
   local relative_path = vim.fn.expand('%:.')
@@ -33,9 +35,26 @@ vim.keymap.set('n', '<leader>n', function()
 end, { desc = 'Filemanager with optional relative path input' })
 ```
 
+vim
+
+```vim
+nnoremap <silent> <leader>n :call <SID>OpenFileManager()<CR>
+function! s:OpenFileManager()
+  let l:relative_path = expand('%:.')
+  let l:cmd = 'CocList filemanager'
+  if l:relative_path != ''
+    let l:escaped_path = escape(l:relative_path, ' \|"*?[]{}$')
+    let l:cmd = 'CocList --input=' . l:escaped_path . ' filemanager'
+  endif
+  execute l:cmd
+endfunction
+```
+
 Q: How to select the directory where the current file is located by default?
 
 A: Create custom keymap like:
+
+lua
 
 ```lua
 vim.keymap.set('n', '<leader>n', function()
@@ -47,6 +66,21 @@ vim.keymap.set('n', '<leader>n', function()
   end
   vim.cmd(cmd)
 end, { desc = 'Filemanager with current directory input' })
+```
+
+vim
+
+```vim
+nnoremap <silent> <leader>n :call <SID>OpenFileManager()<CR>
+function! s:OpenFileManager()
+  let l:relative_dir = expand('%:.:h')
+  let l:cmd = 'CocList filemanager'
+  if l:relative_dir != ''
+    let l:escaped_dir = escape(l:relative_dir, ' \|"*?[]{}$')
+    let l:cmd = 'CocList --input=' . l:escaped_dir . ' filemanager'
+  endif
+  execute l:cmd
+endfunction
 ```
 
 ## License
