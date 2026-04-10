@@ -33,12 +33,12 @@ vim.keymap.set('n', '<leader>n', function()
 end, { desc = 'Filemanager with optional relative path input' })
 ```
 
-Q: How to select the current file dir by default?
+Q: How to select the directory where the current file is located by default?
 
 A: Create custom keymap like:
 
 ```lua
-vim.keymap.set('n', '<leader>y', function()
+vim.keymap.set('n', '<leader>n', function()
   local relative_dir = vim.fn.expand('%:.:h')
   local cmd = 'CocList filemanager'
   if relative_dir and relative_dir ~= '' then
