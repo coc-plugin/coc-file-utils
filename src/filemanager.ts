@@ -235,17 +235,28 @@ Use -folder or -workspace to change search scope.`;
     });
   }
 
+  private getArgs(args: string[], defaultArgs: string[]): string[] {
+    return args.length ? args : defaultArgs;
+  }
+
   public getCommand(): { cmd: string; args: string[] } {
-    if (executable('rg')) {
-      return { cmd: 'rg', args: ['--color', 'never', '--files', '--hidden'] };
-    } else if (executable('ag')) {
-      return { cmd: 'ag', args: ['-f', '-g', '.', '--nocolor', '--hidden'] };
-    } else if (process.platform == 'win32') {
-      return { cmd: 'dir', args: ['/a-D', '/S', '/B'] };
-    } else if (executable('find')) {
-      return { cmd: 'find', args: ['.', '-type', 'f'] };
+    let config = workspace.getConfiguration('list.source.files');
+    let cmd = config.get<string>('command', '');
+    let args = config.get<string[]>('args', []);
+    if (!cmd) {
+      if (executable('rg')) {
+        return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files', '--hidden']) };
+      } else if (executable('ag')) {
+        return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor', '--hidden']) };
+      } else if (process.platform == 'win32') {
+        return { cmd: 'dir', args: this.getArgs(args, ['/a-D', '/S', '/B']) };
+      } else if (executable('find')) {
+        return { cmd: 'find', args: this.getArgs(args, ['.', '-type', 'f']) };
+      } else {
+        throw new Error('Unable to find command for files list.');
+      }
     } else {
-      throw new Error('Unable to find command for files list.');
+      return { cmd, args };
     }
   }
 
