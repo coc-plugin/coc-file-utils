@@ -15,6 +15,24 @@ The best way to create, copy, move, rename and delete file and folder
 
 `:CocList filemanager`
 
+## F.A.Q
+
+Q: How to select the current file by default?
+
+A: Create custom keymap like:
+
+```lua
+vim.keymap.set('n', '<leader>n', function()
+  local relative_path = vim.fn.expand('%:.')
+  local cmd = 'CocList filemanager'
+  if relative_path and relative_path ~= '' then
+    local escaped_path = vim.fn.escape(relative_path, ' \\|*?[]{}$')
+    cmd = 'CocList --input=' .. escaped_path .. ' filemanager'
+  end
+  vim.cmd(cmd)
+end, { desc = 'Filemanager with optional relative path input' })
+```
+
 ## License
 
 MIT
