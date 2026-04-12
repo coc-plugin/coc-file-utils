@@ -28,7 +28,14 @@ class Task extends EventEmitter implements ListTask {
     this.processes = [];
     this.seen = null;
   }
-  public start(cmd: string, args: string[], cwds: string[], patterns: string[]): void {
+  public start(
+    cmd: string,
+    args: string[],
+    cwds: string[],
+    patterns: string[],
+    args2: string[]
+  ): void {
+    const filePath = args2?.find((r) => r?.includes?.('--filePath'))?.split?.('=')?.[1];
     let remain = cwds.length;
     const that = this;
     if (!that.seen) {
@@ -75,11 +82,20 @@ class Task extends EventEmitter implements ListTask {
         }
         if (hasPattern && patterns.some((p) => minimatch.minimatch(file, p))) return;
         let location = Location.create(Uri.file(file).toString(), range);
-        this.emit('data', {
-          label: line,
-          sortText: file,
-          location,
-        });
+        if (filePath) {
+          this.emit('data', {
+            label: line,
+            sortText: file,
+            location,
+            preselect: line === filePath,
+          });
+        } else {
+          this.emit('data', {
+            label: line,
+            sortText: file,
+            location,
+          });
+        }
       });
       rl.on('close', () => {
         remain = remain - 1;
@@ -263,12 +279,13 @@ Use -folder or -workspace to change search scope.`;
   public async loadItems(context: ListContext): Promise<ListTask | null> {
     let { nvim } = this;
     let { window, args } = context;
+    this.args = args;
+    args = args.filter((r) => !r.includes('--filePath'));
     let options = this.parseArguments(args);
     let res = this.getCommand();
     if (!res) return null;
     let used = res.args.concat(['-F', '-folder', '-W', '-workspace', '-G', '-git']);
     let extraArgs = args.filter((s) => used.indexOf(s) == -1);
-    this.args = args;
     let cwds: string[];
     let dirArgs: string[] = [];
     let searchArgs: string[] = [];
@@ -330,7 +347,7 @@ Use -folder or -workspace to change search scope.`;
     }
     let task = new Task();
     const excludePatterns = getConfigItem('excludePatterns', []);
-    task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns);
+    task.start(res.cmd, res.args.concat(searchArgs), cwds, excludePatterns, this.args);
     return task;
   }
 
