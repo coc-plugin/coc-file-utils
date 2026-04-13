@@ -12,9 +12,9 @@ import {
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import * as minimatch from 'minimatch';
-import path from 'path';
+import path, { dirname } from 'path';
 import readline from 'readline';
-import { executable, findGitRoot, generateFolders } from './util';
+import { executable, findGitRoot, generateFolders, getEscapedPath } from './util';
 import { Transform } from 'stream';
 import { createInput, createPrompt } from './util/ui';
 import { create, deleteDir, deleteFile, renameDir, renameFile } from './util/file';
@@ -227,6 +227,18 @@ Use -folder or -workspace to change search scope.`;
         return;
       }
       this.nvim.command(`:split ${item.sortText}`);
+    });
+    this.addAction('open directory', async (item) => {
+      if (!item.sortText) return;
+      const isDirectory = this.isDir(item.sortText);
+      const dir = await getEscapedPath(item.sortText);
+      if (!dir) return;
+      if (isDirectory) {
+        this.nvim.command(`CocList --input=${dir} filemanager`);
+      } else {
+        const parentDir = dirname(dir);
+        this.nvim.command(`CocList --input=${parentDir} filemanager`);
+      }
     });
     this.addAction('copy absolute pathname', async (item) => {
       if (!item.sortText) return;

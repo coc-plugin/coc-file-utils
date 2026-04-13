@@ -1,3 +1,4 @@
+import { workspace } from 'coc.nvim';
 import fs from 'fs';
 import path from 'path';
 import which from 'which';
@@ -30,10 +31,6 @@ export function pad(n: string, total: number): string {
   return new Array(l).fill(' ').join('');
 }
 
-/**
- * Removes duplicates from the given array. The optional keyFn allows to specify
- * how elements are checked for equalness by returning a unique string for each.
- */
 export function distinct<T>(array: T[], keyFn?: (t: T) => string): T[] {
   if (!keyFn) {
     return array.filter((element, position) => {
@@ -90,28 +87,37 @@ export function generateFolders(data: string) {
 
 export function findGitRoot(startPath: string): string | null {
   let currentDir = startPath;
-  // Prevent infinite loop by checking if we reached the filesystem root
   const root = path.parse(currentDir).root;
-
   while (true) {
     const gitPath = path.join(currentDir, '.git');
     try {
       if (fs.existsSync(gitPath)) {
         return currentDir;
       }
-    } catch (e) {
-      // Ignore errors
-    }
+    } catch {}
 
     if (currentDir === root) {
-      return null; // No git root found
+      return null;
     }
 
-    // Move up one directory
     const parentDir = path.dirname(currentDir);
     if (parentDir === currentDir) {
-      return null; // Safety check for root
+      return null;
     }
     currentDir = parentDir;
   }
+}
+
+export async function getEscapedPath(inputPath?: string | null): Promise<string | null> {
+  let relativePath: string;
+  if (inputPath && typeof inputPath === 'string' && inputPath.trim().length > 0) {
+    relativePath = (await workspace.nvim.call('fnamemodify', [inputPath.trim(), ':.'])) as string;
+  } else {
+    relativePath = (await workspace.nvim.call('expand', ['%:.'])) as string;
+  }
+  if (!relativePath || relativePath.length === 0) {
+    return null;
+  }
+  const escaped = (await workspace.nvim.call('fnameescape', [relativePath])) as string;
+  return escaped;
 }
