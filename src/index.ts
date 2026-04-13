@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, listManager, nvim, window, workspace } from 'coc.nvim';
+import { commands, ExtensionContext, listManager, nvim, workspace } from 'coc.nvim';
 import DirsList from './dirs';
 import FilemanagerList from './filemanager';
 import { getConfigItem } from './config';
