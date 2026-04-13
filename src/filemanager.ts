@@ -261,9 +261,9 @@ Use -folder or -workspace to change search scope.`;
     let args = config.get<string[]>('args', []);
     if (!cmd) {
       if (executable('rg')) {
-        return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files', '--hidden']) };
+        return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files']) };
       } else if (executable('ag')) {
-        return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor', '--hidden']) };
+        return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor']) };
       } else if (process.platform == 'win32') {
         return { cmd: 'dir', args: this.getArgs(args, ['/a-D', '/S', '/B']) };
       } else if (executable('find')) {
