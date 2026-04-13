@@ -26,7 +26,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         if (!dir || dir == '.') {
           nvim.command(`CocList filemanager --filePath=${escapedPath}`);
         } else {
-          nvim.command(`CocList --input=${dir} filemanager --filePath=${escapedPath}`);
+          nvim.command(`CocList --input=${dir}/ filemanager --filePath=${escapedPath}`);
         }
       } else {
         nvim.command(`CocList filemanager`);
