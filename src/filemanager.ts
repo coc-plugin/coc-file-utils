@@ -255,15 +255,29 @@ Use -folder or -workspace to change search scope.`;
     return args.length ? args : defaultArgs;
   }
 
-  public getCommand(): { cmd: string; args: string[] } {
+  public getCommand(g = false): { cmd: string; args: string[] } {
     let config = workspace.getConfiguration('list.source.files');
     let cmd = config.get<string>('command', '');
     let args = config.get<string[]>('args', []);
     if (!cmd) {
       if (executable('rg')) {
-        return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files']) };
+        if (g) {
+          return {
+            cmd: 'rg',
+            args: this.getArgs(args, ['--color', 'never', '--files', '--hidden']),
+          };
+        } else {
+          return { cmd: 'rg', args: this.getArgs(args, ['--color', 'never', '--files']) };
+        }
       } else if (executable('ag')) {
-        return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor']) };
+        if (g) {
+          return {
+            cmd: 'ag',
+            args: this.getArgs(args, ['-f', '-g', '.', '--nocolor', '--hidden']),
+          };
+        } else {
+          return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor']) };
+        }
       } else if (process.platform == 'win32') {
         return { cmd: 'dir', args: this.getArgs(args, ['/a-D', '/S', '/B']) };
       } else if (executable('find')) {
@@ -281,8 +295,9 @@ Use -folder or -workspace to change search scope.`;
     let { window, args } = context;
     this.args = args;
     args = args.filter((r) => !r.includes('--filePath'));
+    const g = args?.findIndex((r) => r.includes('-G')) !== -1;
     let options = this.parseArguments(args);
-    let res = this.getCommand();
+    let res = this.getCommand(g);
     if (!res) return null;
     let used = res.args.concat(['-F', '-folder', '-W', '-workspace', '-G', '-git']);
     let extraArgs = args.filter((s) => used.indexOf(s) == -1);
