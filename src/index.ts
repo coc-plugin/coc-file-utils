@@ -2,7 +2,6 @@ import { commands, ExtensionContext, listManager, nvim, workspace } from 'coc.nv
 import DirsList from './dirs';
 import FilemanagerList from './filemanager';
 import { getConfigItem } from './config';
-import { dirname } from 'path';
 async function getEscapedPath() {
   const relativePath = (await workspace.nvim.call('expand', ['%:.'])) as string;
   if (relativePath && relativePath.length > 0) {
@@ -22,18 +21,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     commands.registerCommand('file-utils.open', async () => {
       const escapedPath = await getEscapedPath();
       if (escapedPath) {
-        const dir = dirname(escapedPath);
-        if (!dir || dir == '.') {
-          nvim.command(`CocList filemanager --filePath=${escapedPath}`);
-        } else {
-          nvim.command(`CocList --input=${dir}/ filemanager --filePath=${escapedPath}`);
-        }
+        nvim.command(`CocList filemanager --filePath=${escapedPath}`);
       } else {
         nvim.command(`CocList filemanager`);
       }
-    }),
-    commands.registerCommand('file-utils.openCwd', () => {
-      nvim.command('CocList filemanager');
     }),
     commands.registerCommand('file-utils.openGit', async () => {
       nvim.command('CocList filemanager -G');

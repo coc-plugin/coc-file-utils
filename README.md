@@ -17,8 +17,7 @@ The best way to create, copy, move, rename and delete file and folder
 
 ## Commands
 
-- `file-utils.open`: Open Current File Directory
-- `file-utils.openCwd`: Open Current Working Directory (CWD)
+- `file-utils.open`: Open Current Working Directory (CWD)
 - `file-utils.openGit`: Open Git Repository Root
 
 ## License

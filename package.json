@@ -1,6 +1,6 @@
 {
   "name": "coc-file-utils",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "The best way to create, copy, move, rename and delete files and folders (multiple files)",
   "author": "cyl <a1008611abcd@126.com>",
   "license": "MIT",
@@ -47,12 +47,8 @@
     },
     "commands": [
       {
-        "title": "Open Current File Directory",
-        "command": "file-utils.open"
-      },
-      {
         "title": "Open Current Working Directory (CWD)",
-        "command": "file-utils.openCwd"
+        "command": "file-utils.open"
       },
       {
         "title": "Open Git Repository Root",
