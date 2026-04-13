@@ -19,6 +19,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
         nvim.command(`CocList filemanager`);
       }
     }),
+    commands.registerCommand('file-utils.openCwd', async () => {
+      nvim.command(`CocList filemanager`);
+    }),
     commands.registerCommand('file-utils.openGit', async () => {
       nvim.command('CocList filemanager -G');
     })
