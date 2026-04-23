@@ -85,16 +85,29 @@ export function generateFolders(data: string) {
     }
   });
 
-  // 添加所有文件夹到结果中
-  const folders = Array.from(folderSet).sort();
-  const result = [...folders, ...items];
-  
-  // 去重并保持顺序
+  // 去重并保持原始顺序
   const seen = new Set<string>();
-  return result.filter(item => {
+  const uniqueItems = items.filter(item => {
     if (seen.has(item)) return false;
     seen.add(item);
     return true;
+  });
+
+  // 按层级排序：先按目录深度，再按名称字母顺序
+  return uniqueItems.sort((a, b) => {
+    const cleanA = a.endsWith('/') ? a.slice(0, -1) : a;
+    const cleanB = b.endsWith('/') ? b.slice(0, -1) : b;
+    const partsA = cleanA.split('/');
+    const partsB = cleanB.split('/');
+
+    // 逐级比较
+    for (let i = 0; i < Math.min(partsA.length, partsB.length); i++) {
+      const compare = partsA[i].localeCompare(partsB[i]);
+      if (compare !== 0) return compare;
+    }
+
+    // 较短的路径排在前面（父目录在前）
+    return partsA.length - partsB.length;
   });
 }
 
