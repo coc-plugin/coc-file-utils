@@ -159,12 +159,9 @@ export async function renameFile(srcFilePath: string, newName: string): Promise<
       return;
     }
 
-    await closeFileBuffer(srcFilePath).catch(() => {});
-
     const dir = path.dirname(srcFilePath);
     const destFilePath = path.join(dir, newName);
 
-    await closeFileBuffer(srcFilePath).catch(() => {});
     await fs.rename(srcFilePath, destFilePath);
     await nvim.command(`edit ${destFilePath}`);
     window.showInformationMessage(`File renamed to: ${destFilePath}`);
