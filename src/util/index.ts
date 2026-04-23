@@ -61,15 +61,19 @@ export function generateFolders(data: string) {
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
-  const files: string[] = [];
+  const items: string[] = [];
   const folderSet = new Set<string>();
 
   lines.forEach((path) => {
     if (path.endsWith('/')) {
+      // 来自 ag 的输出，以 / 结尾表示文件夹
       folderSet.add(path);
+      items.push(path);
     } else {
-      files.push(path);
-
+      // 来自 find/fd/rg 的输出，需要检查是否是文件夹
+      items.push(path);
+      
+      // 从文件路径中提取父文件夹
       const parts = path.split('/');
       if (parts.length > 1) {
         let currentDir = '';
@@ -81,8 +85,17 @@ export function generateFolders(data: string) {
     }
   });
 
+  // 添加所有文件夹到结果中
   const folders = Array.from(folderSet).sort();
-  return [...folders, ...files];
+  const result = [...folders, ...items];
+  
+  // 去重并保持顺序
+  const seen = new Set<string>();
+  return result.filter(item => {
+    if (seen.has(item)) return false;
+    seen.add(item);
+    return true;
+  });
 }
 
 export function findGitRoot(startPath: string): string | null {

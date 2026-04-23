@@ -128,6 +128,10 @@ export default class FilesList extends BasicList {
   public getCommand(): { cmd: string; args: string[] } {
     if (executable('fd')) {
       return { cmd: 'fd', args: ['--color', 'never', '--type', 'directory', '-H'] };
+    } else if (executable('find')) {
+      return { cmd: 'find', args: ['.', '-type', 'd', '-print'] };
+    } else if (process.platform == 'win32') {
+      return { cmd: 'dir', args: ['/aD', '/S', '/B'] };
     } else {
       throw new Error('Unable to find command for dirs list.');
     }

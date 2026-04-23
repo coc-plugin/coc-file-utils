@@ -272,7 +272,22 @@ Use -folder or -workspace to change search scope.`;
     let cmd = config.get<string>('command', '');
     let args = config.get<string[]>('args', []);
     if (!cmd) {
-      if (executable('rg')) {
+      if (executable('fd')) {
+        if (g) {
+          return {
+            cmd: 'fd',
+            args: this.getArgs(args, ['--color', 'never', '--hidden', '--type', 'f', '--type', 'd']),
+          };
+        } else {
+          return { cmd: 'fd', args: this.getArgs(args, ['--color', 'never', '--type', 'f', '--type', 'd']) };
+        }
+      } else if (executable('find')) {
+        if (g) {
+          return { cmd: 'find', args: this.getArgs(args, ['.', '-name', '.*', '-o', '-print']) };
+        } else {
+          return { cmd: 'find', args: this.getArgs(args, ['.', '-print']) };
+        }
+      } else if (executable('rg')) {
         if (g) {
           return {
             cmd: 'rg',
@@ -291,9 +306,7 @@ Use -folder or -workspace to change search scope.`;
           return { cmd: 'ag', args: this.getArgs(args, ['-f', '-g', '.', '--nocolor']) };
         }
       } else if (process.platform == 'win32') {
-        return { cmd: 'dir', args: this.getArgs(args, ['/a-D', '/S', '/B']) };
-      } else if (executable('find')) {
-        return { cmd: 'find', args: this.getArgs(args, ['.', '-type', 'f']) };
+        return { cmd: 'dir', args: this.getArgs(args, ['/a', '/S', '/B']) };
       } else {
         throw new Error('Unable to find command for files list.');
       }
