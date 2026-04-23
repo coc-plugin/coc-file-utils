@@ -207,6 +207,8 @@ Use -folder or -workspace to change search scope.`;
         if (!fileName || fileName === 'outPut' || !item.sortText) return;
         create(item.sortText, fileName);
       } else {
+        const currentFile = (await this.nvim.call('expand', '%:p')) as string;
+        if (currentFile === item.sortText) return;
         this.nvim.command(`:e ${item.sortText}`);
       }
     });
@@ -276,10 +278,21 @@ Use -folder or -workspace to change search scope.`;
         if (g) {
           return {
             cmd: 'fd',
-            args: this.getArgs(args, ['--color', 'never', '--hidden', '--type', 'f', '--type', 'd']),
+            args: this.getArgs(args, [
+              '--color',
+              'never',
+              '--hidden',
+              '--type',
+              'f',
+              '--type',
+              'd',
+            ]),
           };
         } else {
-          return { cmd: 'fd', args: this.getArgs(args, ['--color', 'never', '--type', 'f', '--type', 'd']) };
+          return {
+            cmd: 'fd',
+            args: this.getArgs(args, ['--color', 'never', '--type', 'f', '--type', 'd']),
+          };
         }
       } else if (executable('find')) {
         if (g) {
