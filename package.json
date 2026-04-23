@@ -1,6 +1,6 @@
 {
   "name": "coc-file-utils",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "The best way to create, copy, move, rename and delete files and folders (multiple files)",
   "author": "cyl <a1008611abcd@126.com>",
   "license": "MIT",
