@@ -163,7 +163,7 @@ Use -folder or -workspace to change search scope.`;
       } else {
         newName = await createInput('Enter the new name of this file', name);
       }
-      if (!newName || newName === 'outPut') return;
+      if (!newName || newName === 'outPut' || newName === name) return;
       const confirm = await createPrompt(`Are you sure you want to rename ${name} to ${newName}?`);
       if (confirm) {
         if (isDirectory) {
