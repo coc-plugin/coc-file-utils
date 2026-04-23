@@ -228,7 +228,7 @@ Use -folder or -workspace to change search scope.`;
       }
       this.nvim.command(`:split ${item.sortText}`);
     });
-    this.addAction('open directory', async (item) => {
+    this.addAction('to directory', async (item) => {
       if (!item.sortText) return;
       const isDirectory = this.isDir(item.sortText);
       const dir = await getEscapedPath(item.sortText);
@@ -240,12 +240,12 @@ Use -folder or -workspace to change search scope.`;
         this.nvim.command(`CocList --input=${parentDir} filemanager`);
       }
     });
-    this.addAction('copy absolute pathname', async (item) => {
+    this.addAction('absolute pathname', async (item) => {
       if (!item.sortText) return;
       await this.nvim.call('setreg', ['+', item.sortText]);
       window.showInformationMessage('Absolute path copied to clipboard');
     });
-    this.addAction('copy relative pathname', async (item) => {
+    this.addAction('relative pathname', async (item) => {
       if (!item.sortText) return;
       const cwd = (await this.nvim.call('getcwd')) as string;
       let relativePath = path.relative(cwd, item.sortText);
@@ -255,7 +255,7 @@ Use -folder or -workspace to change search scope.`;
       await this.nvim.call('setreg', ['+', relativePath]);
       window.showInformationMessage('Relative path copied to clipboard');
     });
-    this.addAction('copy filename', async (item) => {
+    this.addAction('filename', async (item) => {
       if (!item.sortText) return;
       const filename = path.basename(item.sortText);
       await this.nvim.call('setreg', ['+', filename]);
