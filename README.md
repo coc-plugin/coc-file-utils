@@ -20,6 +20,7 @@ The best way to create, copy, move, rename and delete file and folder
 - `file-utils.open`: Open Current Working Directory (CWD) And Select Current File
 - `file-utils.openCwd`: Open Current Working Directory (CWD)
 - `file-utils.openGit`: Open Git Repository Root
+- `file-utils.wipeFileBuffer`: wipe file Buffer
 
 ## License
 

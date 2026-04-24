@@ -3,6 +3,7 @@ import DirsList from './dirs';
 import FilemanagerList from './filemanager';
 import { getConfigItem } from './config';
 import { getEscapedPath } from './util';
+import { wipeFileBuffer } from './util/buffer';
 export async function activate(context: ExtensionContext): Promise<void> {
   const enable = getConfigItem('enable', true);
   if (!enable) {
@@ -24,6 +25,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }),
     commands.registerCommand('file-utils.openGit', async () => {
       nvim.command('CocList filemanager -G');
+    }),
+    commands.registerCommand('file-utils.wipeFileBuffer', async () => {
+      const escapedPath = await getEscapedPath();
+      if (escapedPath) {
+        wipeFileBuffer(escapedPath);
+      }
     })
   );
 }

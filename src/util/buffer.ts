@@ -28,3 +28,19 @@ export async function closeFileBuffer(filePath: string) {
     console.error('closeFileBuffer error:', e);
   }
 }
+
+export async function wipeFileBuffer(filePath: string) {
+  const escaped = filePath.replace(/'/g, "''");
+  const cmd = `
+    let win = bufwinnr('${escaped}')
+    if win != -1
+      execute win . 'windo enew'
+    endif
+    execute 'bdelete! ' . bufnr('${escaped}')
+  `;
+  try {
+    await nvim.command(cmd);
+  } catch (e) {
+    console.error('wipeFileBuffer error:', e);
+  }
+}
